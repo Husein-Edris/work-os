@@ -72,10 +72,12 @@ $voice_rate           = get_option( 'work_os_voice_rate', '€38/hr' );
 $voice_niche          = get_option( 'work_os_voice_niche', 'WordPress / WooCommerce' );
 $voice_tagline        = get_option( 'work_os_voice_tagline', '' );
 
-function work_os_mask( $key ) {
-	if ( empty( $key ) ) return '';
-	$len = strlen( $key );
-	return $len <= 4 ? str_repeat( '*', $len ) : str_repeat( '*', $len - 4 ) . substr( $key, -4 );
+if ( ! function_exists( 'work_os_mask' ) ) {
+	function work_os_mask( $key ) {
+		if ( empty( $key ) ) return '';
+		$len = strlen( $key );
+		return $len <= 4 ? str_repeat( '*', $len ) : str_repeat( '*', $len - 4 ) . substr( $key, -4 );
+	}
 }
 ?>
 <div class="wrap">

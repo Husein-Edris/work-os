@@ -209,7 +209,7 @@ $claude_set = ! empty( get_option( 'work_os_claude_key', '' ) );
 		} catch(e) {
 			list.innerHTML = '<p style="padding:16px;color:#cc1818;font-size:13px;margin:0">Could not load log.</p>';
 		}
-		function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+		function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 	})();
 })();
 </script>

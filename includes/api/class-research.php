@@ -266,7 +266,7 @@ class WorkOS_Research {
 		$username = trim( parse_url( $github_url, PHP_URL_PATH ), '/' );
 		if ( ! $username ) return '';
 
-		$api_url  = "https://api.github.com/users/{$username}/repos?sort=pushed&per_page=30&type=owner";
+		$api_url  = 'https://api.github.com/users/' . rawurlencode( $username ) . '/repos?sort=pushed&per_page=30&type=owner';
 		$response = wp_remote_get( $api_url, array(
 			'timeout' => 10,
 			'headers' => array(
