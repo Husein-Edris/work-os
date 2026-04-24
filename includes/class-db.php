@@ -59,6 +59,16 @@ class WorkOS_DB {
 			PRIMARY KEY (id)
 		) $charset;" );
 
+		dbDelta( "CREATE TABLE {$wpdb->prefix}work_os_documents (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+			title varchar(255) NOT NULL DEFAULT '',
+			category varchar(50) NOT NULL DEFAULT 'other',
+			attachment_id bigint(20) NOT NULL DEFAULT 0,
+			description text DEFAULT '',
+			PRIMARY KEY (id)
+		) $charset;" );
+
 		update_option( 'work_os_db_version', WORK_OS_VERSION );
 	}
 }

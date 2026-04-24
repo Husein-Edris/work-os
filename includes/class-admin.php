@@ -24,6 +24,7 @@ class WorkOS_Admin {
 
 		add_submenu_page( 'work-os', 'Today — Work OS',     'Today',     'manage_options', 'work-os',           array( $this, 'page_today' ) );
 		add_submenu_page( 'work-os', 'CV — Work OS',        'CV',        'manage_options', 'work-os-cv',        array( $this, 'page_cv' ) );
+		add_submenu_page( 'work-os', 'Documents — Work OS', 'Documents', 'manage_options', 'work-os-documents', array( $this, 'page_documents' ) );
 		add_submenu_page( 'work-os', 'Research — Work OS',  'Research',  'manage_options', 'work-os-research',  array( $this, 'page_research' ) );
 		add_submenu_page( 'work-os', 'Proposals — Work OS', 'Proposals', 'manage_options', 'work-os-proposals', array( $this, 'page_proposals' ) );
 		add_submenu_page( 'work-os', 'Memory — Work OS',    'Memory',    'manage_options', 'work-os-memory',    array( $this, 'page_memory' ) );
@@ -35,18 +36,28 @@ class WorkOS_Admin {
 		$work_os_hooks = array(
 			'toplevel_page_work-os',
 			'work-os_page_work-os-cv',
+			'work-os_page_work-os-documents',
 			'work-os_page_work-os-research',
 			'work-os_page_work-os-proposals',
 			'work-os_page_work-os-memory',
 			'work-os_page_work-os-blog',
 			'work-os_page_work-os-settings',
 		);
+
+		// Enqueue WP media uploader for Documents page
+		if ( $hook === 'work-os_page_work-os-documents' ) {
+			wp_enqueue_media();
+		}
 		if ( ! in_array( $hook, $work_os_hooks, true ) ) {
 			return;
 		}
 
 		// Shared Work OS admin styles
 		wp_add_inline_style( 'wp-admin', '
+			/* ── Postbox heading padding ── */
+			#wpcontent .postbox-header h2.hndle,
+			#wpcontent .postbox-header .hndle { padding-left: 14px; }
+
 			/* ── Shared output areas ── */
 			.wo-output {
 				font-size: 13px;
@@ -145,6 +156,10 @@ class WorkOS_Admin {
 
 	public function page_cv() {
 		require_once WORK_OS_PATH . 'admin/page-cv.php';
+	}
+
+	public function page_documents() {
+		require_once WORK_OS_PATH . 'admin/page-documents.php';
 	}
 
 	public function page_research() {

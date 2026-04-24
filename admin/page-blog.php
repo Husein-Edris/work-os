@@ -35,51 +35,51 @@ $formats = array(
 		</div>
 	<?php endif; ?>
 
-	<div style="max-width:960px;margin-top:20px;display:grid;grid-template-columns:3fr 2fr;gap:20px;align-items:start">
+	<div style="margin-top:20px;display:grid;grid-template-columns:3fr 2fr;gap:20px;align-items:start">
 
 		<div class="postbox">
 			<div class="postbox-header"><h2 class="hndle">Generate post</h2></div>
 			<div class="inside">
-				<table class="form-table" style="margin:0">
-					<tr>
-						<th style="width:80px"><label for="wo-blog-topic">Topic</label></th>
-						<td><input type="text" id="wo-blog-topic" class="large-text" placeholder="e.g. How I migrated a WooCommerce shop to headless WordPress"></td>
-					</tr>
-					<tr>
-						<th><label for="wo-blog-format">Format</label></th>
-						<td>
-							<select id="wo-blog-format" class="regular-text">
-								<?php foreach ( $formats as $val => $label ) : ?>
-									<option value="<?php echo esc_attr( $val ); ?>"><?php echo esc_html( $label ); ?></option>
-								<?php endforeach; ?>
-							</select>
-						</td>
-					</tr>
+
+				<div style="margin-bottom:14px">
+					<label for="wo-blog-topic" style="display:block;font-size:12px;font-weight:600;color:#1d2327;margin-bottom:5px">Topic</label>
+					<input type="text" id="wo-blog-topic" class="large-text" placeholder="e.g. How I migrated a WooCommerce shop to headless WordPress">
+				</div>
+
+				<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+					<div>
+						<label for="wo-blog-format" style="display:block;font-size:12px;font-weight:600;color:#1d2327;margin-bottom:5px">Format</label>
+						<select id="wo-blog-format" style="width:100%">
+							<?php foreach ( $formats as $val => $label ) : ?>
+								<option value="<?php echo esc_attr( $val ); ?>"><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
 					<?php if ( ! empty( $memory_events ) ) : ?>
-					<tr>
-						<th><label for="wo-blog-memory">Memory</label></th>
-						<td>
-							<select id="wo-blog-memory" class="regular-text">
-								<option value="">— none —</option>
-								<?php foreach ( $memory_events as $ev ) : ?>
-									<option value="<?php echo (int) $ev['id']; ?>">
-										<?php echo esc_html( substr( $ev['created_at'], 0, 10 ) . ' — ' . wp_trim_words( $ev['note'], 8 ) ); ?>
-									</option>
-								<?php endforeach; ?>
-							</select>
-							<p class="description">Ground the post in a specific memory event.</p>
-						</td>
-					</tr>
+					<div>
+						<label for="wo-blog-memory" style="display:block;font-size:12px;font-weight:600;color:#1d2327;margin-bottom:5px">Ground in memory</label>
+						<select id="wo-blog-memory" style="width:100%">
+							<option value="">— none —</option>
+							<?php foreach ( $memory_events as $ev ) : ?>
+								<option value="<?php echo (int) $ev['id']; ?>">
+									<?php echo esc_html( substr( $ev['created_at'], 0, 10 ) . ' — ' . wp_trim_words( $ev['note'], 8 ) ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</div>
 					<?php endif; ?>
-					<tr>
-						<th><label for="wo-blog-extra">Extra context</label></th>
-						<td><textarea id="wo-blog-extra" rows="3" class="large-text" placeholder="Target audience, specific angle, key points to cover…"></textarea></td>
-					</tr>
-				</table>
-				<p>
+				</div>
+
+				<div style="margin-bottom:16px">
+					<label for="wo-blog-extra" style="display:block;font-size:12px;font-weight:600;color:#1d2327;margin-bottom:5px">Extra context <span style="font-weight:400;color:#8c8f94">(optional)</span></label>
+					<textarea id="wo-blog-extra" rows="3" class="large-text" placeholder="Target audience, specific angle, key points to cover…"></textarea>
+				</div>
+
+				<div style="display:flex;align-items:center;gap:10px">
 					<button id="wo-generate-btn" class="button button-primary" <?php echo $claude_set ? '' : 'disabled'; ?>>Generate with Claude</button>
-					<span id="wo-generate-status" style="margin-left:10px;font-size:13px;color:#646970"></span>
-				</p>
+					<span id="wo-generate-status" style="font-size:13px;color:#646970"></span>
+				</div>
+
 			</div>
 		</div>
 
@@ -113,16 +113,16 @@ $formats = array(
 
 		<div id="wo-post-wrap" style="display:none;grid-column:1/-1">
 			<div class="postbox">
-				<div class="postbox-header">
-					<h2 class="hndle">Generated Post</h2>
-					<div style="display:flex;align-items:center;gap:8px;margin:10px 12px 0 0">
-						<input type="text" id="wo-post-title" class="regular-text" placeholder="Post title…" style="font-size:13px;min-width:260px">
-						<button id="wo-publish-btn" class="button button-primary">Publish as draft →</button>
-					</div>
-				</div>
+				<div class="postbox-header"><h2 class="hndle">Generated Post</h2></div>
 				<div class="inside">
-					<div id="wo-publish-status" style="margin-bottom:10px;font-size:13px;color:#646970;min-height:20px"></div>
-					<textarea id="wo-post-content" rows="24" class="large-text" style="font-size:13px;line-height:1.7;font-family:Georgia,serif;background:#fafafa;border-color:#dcdcde"></textarea>
+					<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+						<input type="text" id="wo-post-title" class="regular-text" placeholder="Post title…"
+							style="font-size:13px;flex:1;min-width:240px">
+						<button id="wo-publish-btn" class="button button-primary">Publish as draft →</button>
+						<span id="wo-publish-status" style="font-size:13px;color:#646970"></span>
+					</div>
+					<textarea id="wo-post-content" rows="26" class="large-text"
+						style="font-size:13px;line-height:1.7;font-family:monospace;background:#f8f9fa;border-color:#dcdcde;resize:vertical"></textarea>
 				</div>
 			</div>
 		</div>

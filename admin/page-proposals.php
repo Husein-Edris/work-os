@@ -20,7 +20,7 @@ $status_colors = array(
 	<h1 class="wp-heading-inline">Work OS — Proposals</h1>
 	<hr class="wp-header-end">
 
-	<div style="max-width:860px;margin-top:20px">
+	<div style="margin-top:20px">
 
 		<!-- STEP 1: Paste & Extract -->
 		<div class="postbox" id="wo-paste-box">
@@ -87,18 +87,21 @@ $status_colors = array(
 					</tr>
 					<tr>
 						<th><label for="wo-p-notes">Notes</label></th>
-						<td><textarea id="wo-p-notes" rows="4" class="large-text" placeholder="Requirements, tech stack, context, red flags…"></textarea></td>
+						<td><textarea id="wo-p-notes" rows="10" class="large-text" style="min-height:160px;resize:vertical" placeholder="Requirements, tech stack, context, red flags…"></textarea></td>
 					</tr>
 				</table>
 			</div>
 		</div>
 
-		<!-- STEP 3a: Research results (hidden until triggered) -->
-		<div id="wo-research-box" style="display:none" class="postbox">
+		<!-- STEP 3: Research -->
+		<div id="wo-research-box" class="postbox">
 			<div class="postbox-header"><h2 class="hndle" id="wo-research-heading">Step 3 — Research</h2></div>
 			<div class="inside" style="padding:0">
+				<div id="wo-research-placeholder" style="padding:16px;font-size:13px;color:#8c8f94">
+					Fill in Company above, then click <strong style="color:#1d2327">Research with Gemini →</strong> to research the company and surface tech stack, team size, recent news, and red flags.
+				</div>
 				<div id="wo-research-status" style="padding:12px 16px;font-size:13px;color:#646970;display:none"></div>
-				<div id="wo-research-output" class="wo-output" style="margin:0 16px 16px;max-height:420px"></div>
+				<div id="wo-research-output" class="wo-output" style="display:none;margin:0 16px 16px;max-height:420px"></div>
 				<div style="padding:0 16px 14px">
 					<button id="wo-analyse-btn" class="button button-primary button-large" style="display:none;width:100%">Analyse fit with Claude →</button>
 				</div>
@@ -143,8 +146,8 @@ $status_colors = array(
 					<th style="width:100px">Budget</th>
 					<th style="width:80px">Source</th>
 					<th style="width:90px">Status</th>
-					<th>Notes</th>
-					<th style="width:160px"></th>
+					<th style="width:180px">Notes</th>
+					<th style="width:180px"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -153,9 +156,9 @@ $status_colors = array(
 				<?php else : ?>
 					<?php foreach ( $proposals as $p ) :
 						$c = $status_colors[ $p['status'] ] ?? '#646970'; ?>
-						<tr id="wo-proposal-<?php echo (int) $p['id']; ?>">
-							<td style="white-space:nowrap;color:#646970;font-size:12px"><?php echo esc_html( substr( $p['created_at'], 0, 10 ) ); ?></td>
-							<td>
+						<tr id="wo-proposal-<?php echo (int) $p['id']; ?>" style="cursor:default">
+							<td style="white-space:nowrap;color:#8c8f94;font-size:12px;vertical-align:top;padding-top:10px"><?php echo esc_html( substr( $p['created_at'], 0, 10 ) ); ?></td>
+							<td style="vertical-align:top;padding-top:9px">
 								<strong style="font-size:13px"><?php echo esc_html( $p['title'] ); ?></strong>
 								<?php if ( $p['company'] ) : ?>
 									<br><span style="font-size:12px;color:#646970"><?php echo esc_html( $p['company'] ); ?></span>
@@ -164,21 +167,57 @@ $status_colors = array(
 									<br><a href="<?php echo esc_url( $p['job_url'] ); ?>" target="_blank" style="font-size:11px">↗ Job link</a>
 								<?php endif; ?>
 							</td>
-							<td style="font-size:12px"><?php echo esc_html( $p['budget'] ); ?></td>
-							<td style="font-size:12px;color:#646970"><?php echo esc_html( $p['source'] ); ?></td>
-							<td>
-								<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;text-transform:uppercase;background:<?php echo esc_attr( $c ); ?>22;color:<?php echo esc_attr( $c ); ?>">
+							<td style="font-size:12px;vertical-align:top;padding-top:10px"><?php echo esc_html( $p['budget'] ); ?></td>
+							<td style="font-size:12px;color:#646970;vertical-align:top;padding-top:10px"><?php echo esc_html( $p['source'] ); ?></td>
+							<td style="vertical-align:top;padding-top:9px">
+								<span class="wo-badge" style="background:<?php echo esc_attr( $c ); ?>18;color:<?php echo esc_attr( $c ); ?>">
 									<?php echo esc_html( $p['status'] ); ?>
 								</span>
 							</td>
-							<td style="font-size:12px;color:#646970;max-width:200px"><?php echo esc_html( wp_trim_words( $p['notes'], 10 ) ); ?></td>
-							<td style="white-space:nowrap">
-								<select class="wo-status-select" data-id="<?php echo (int) $p['id']; ?>" style="font-size:12px">
+							<td style="font-size:12px;color:#646970;max-width:180px;vertical-align:top;padding-top:10px"><?php echo esc_html( wp_trim_words( $p['notes'], 12 ) ); ?></td>
+							<td style="white-space:nowrap;vertical-align:top;padding-top:8px">
+								<button class="button button-small wo-view-btn" data-id="<?php echo (int) $p['id']; ?>">View ↓</button>
+								<select class="wo-status-select" data-id="<?php echo (int) $p['id']; ?>" style="font-size:12px;margin-left:4px">
 									<?php foreach ( $statuses as $s ) : ?>
 										<option value="<?php echo esc_attr( $s ); ?>" <?php selected( $s, $p['status'] ); ?>><?php echo esc_html( ucfirst( $s ) ); ?></option>
 									<?php endforeach; ?>
 								</select>
-								<button class="button button-small wo-delete-proposal-btn" data-id="<?php echo (int) $p['id']; ?>" style="color:#cc1818;border-color:#cc1818;margin-left:4px">×</button>
+								<button class="button button-small wo-delete-proposal-btn" data-id="<?php echo (int) $p['id']; ?>" style="color:#cc1818;border-color:#cc181833;margin-left:4px">×</button>
+							</td>
+						</tr>
+						<tr id="wo-detail-<?php echo (int) $p['id']; ?>" style="display:none">
+							<td colspan="7" style="padding:0;border-top:none">
+								<div style="background:#f8f9fa;border-top:2px solid #2271b1;padding:20px 24px 24px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+									<?php if ( $p['notes'] ) : ?>
+									<div>
+										<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#8c8f94;margin-bottom:8px">Notes</div>
+										<div style="font-size:13px;color:#1d2327;line-height:1.65;white-space:pre-wrap"><?php echo esc_html( $p['notes'] ); ?></div>
+									</div>
+									<?php endif; ?>
+
+									<?php if ( $p['draft'] ) : ?>
+									<div>
+										<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+											<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#8c8f94">Draft</span>
+											<button class="button button-small wo-copy-draft-btn" data-id="<?php echo (int) $p['id']; ?>">Copy</button>
+										</div>
+										<div style="font-size:13px;color:#1d2327;line-height:1.65;white-space:pre-wrap;max-height:300px;overflow-y:auto;background:#fff;border:1px solid #dcdcde;border-radius:4px;padding:12px 14px"><?php echo esc_html( $p['draft'] ); ?></div>
+									</div>
+									<?php endif; ?>
+
+									<?php if ( $p['analysis'] ) : ?>
+									<div style="<?php echo ( $p['notes'] && ! $p['draft'] ) ? '' : 'grid-column:1/-1'; ?>">
+										<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#8c8f94;margin-bottom:8px">Fit Analysis</div>
+										<div style="font-size:13px;color:#1d2327;line-height:1.65;white-space:pre-wrap;max-height:200px;overflow-y:auto;background:#fff;border:1px solid #dcdcde;border-radius:4px;padding:12px 14px"><?php echo esc_html( $p['analysis'] ); ?></div>
+									</div>
+									<?php endif; ?>
+
+									<?php if ( ! $p['notes'] && ! $p['draft'] && ! $p['analysis'] ) : ?>
+									<div style="grid-column:1/-1;color:#646970;font-size:13px">No notes, draft, or analysis saved for this proposal.</div>
+									<?php endif; ?>
+
+								</div>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -343,24 +382,25 @@ $status_colors = array(
 		const jobDesc = document.getElementById('wo-p-notes').value.trim();
 		if (!company) { alert('Enter a company name first.'); return; }
 
-		const researchBox  = document.getElementById('wo-research-box');
-		const statusEl     = document.getElementById('wo-research-status');
-		const outputEl     = document.getElementById('wo-research-output');
-		const analyseBtn   = document.getElementById('wo-analyse-btn');
-		const analysisBox  = document.getElementById('wo-analysis-box');
+		const placeholderEl = document.getElementById('wo-research-placeholder');
+		const statusEl      = document.getElementById('wo-research-status');
+		const outputEl      = document.getElementById('wo-research-output');
+		const analyseBtn    = document.getElementById('wo-analyse-btn');
+		const analysisBox   = document.getElementById('wo-analysis-box');
 
-		researchBox.style.display  = 'block';
-		statusEl.style.display     = 'block';
-		statusEl.textContent       = 'Researching with Gemini…';
-		outputEl.innerHTML         = '';
-		analyseBtn.style.display   = 'none';
-		analysisBox.style.display  = 'none';
+		placeholderEl.style.display = 'none';
+		statusEl.style.display      = 'block';
+		statusEl.textContent        = 'Researching with Gemini…';
+		outputEl.style.display      = 'none';
+		outputEl.innerHTML          = '';
+		analyseBtn.style.display    = 'none';
+		analysisBox.style.display   = 'none';
 		document.getElementById('wo-analysis-output').innerHTML  = '';
 		document.getElementById('wo-analysis-status').style.display = 'none';
 		document.getElementById('wo-research-heading').textContent  = 'Step 3 — Research: ' + company;
-		researchText  = '';
-		analysisText  = '';
-		currentLogId  = 0;
+		researchText = '';
+		analysisText = '';
+		currentLogId = 0;
 
 		this.disabled = true;
 
@@ -373,10 +413,11 @@ $status_colors = array(
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.message || 'Error');
 
-			researchText          = data.output || '';
-			currentLogId          = data.log_id || 0;
-			outputEl.innerHTML    = renderMarkdown(researchText);
-			statusEl.style.display = 'none';
+			researchText             = data.output || '';
+			currentLogId             = data.log_id || 0;
+			outputEl.innerHTML       = renderMarkdown(researchText);
+			outputEl.style.display   = '';
+			statusEl.style.display   = 'none';
 			analyseBtn.style.display = 'block';
 
 		} catch(e) {
@@ -531,15 +572,16 @@ $status_colors = array(
 		document.getElementById('wo-extract-btn').style.display = '';
 		document.getElementById('wo-paste-box').style.display   = '';
 		document.getElementById('wo-paste-heading').textContent = 'Step 1 — Paste job listing or message';
-		document.getElementById('wo-research-box').style.display    = 'none';
-		document.getElementById('wo-analysis-box').style.display    = 'none';
-		document.getElementById('wo-research-output').innerHTML      = '';
-		document.getElementById('wo-analysis-output').innerHTML      = '';
-		document.getElementById('wo-analyse-btn').style.display      = 'none';
-		document.getElementById('wo-research-status').style.display  = 'none';
-		document.getElementById('wo-analysis-status').style.display  = 'none';
-		document.getElementById('wo-draft-status').style.display     = 'none';
-		document.getElementById('wo-research-heading').textContent   = 'Step 3 — Research';
+		document.getElementById('wo-research-placeholder').style.display = '';
+		document.getElementById('wo-research-output').style.display     = 'none';
+		document.getElementById('wo-research-output').innerHTML          = '';
+		document.getElementById('wo-analysis-box').style.display         = 'none';
+		document.getElementById('wo-analysis-output').innerHTML          = '';
+		document.getElementById('wo-analyse-btn').style.display          = 'none';
+		document.getElementById('wo-research-status').style.display      = 'none';
+		document.getElementById('wo-analysis-status').style.display      = 'none';
+		document.getElementById('wo-draft-status').style.display         = 'none';
+		document.getElementById('wo-research-heading').textContent       = 'Step 3 — Research';
 		researchText = '';
 		analysisText = '';
 		currentLogId = 0;
@@ -557,25 +599,61 @@ $status_colors = array(
 		const tr = document.createElement('tr');
 		tr.id = 'wo-proposal-' + p.id;
 		tr.innerHTML = `
-			<td style="white-space:nowrap;color:#646970;font-size:12px">${p.created_at.substring(0,10)}</td>
-			<td>
+			<td style="white-space:nowrap;color:#8c8f94;font-size:12px;vertical-align:top;padding-top:10px">${p.created_at.substring(0,10)}</td>
+			<td style="vertical-align:top;padding-top:9px">
 				<strong style="font-size:13px">${esc(p.title)}</strong>
 				${p.company ? '<br><span style="font-size:12px;color:#646970">' + esc(p.company) + '</span>' : ''}
 				${p.job_url ? '<br><a href="' + esc(p.job_url) + '" target="_blank" style="font-size:11px">↗ Job link</a>' : ''}
 			</td>
-			<td style="font-size:12px">${esc(p.budget||'')}</td>
-			<td style="font-size:12px;color:#646970">${esc(p.source||'')}</td>
-			<td><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;text-transform:uppercase;background:${c}22;color:${c}">${esc(p.status)}</span></td>
-			<td style="font-size:12px;color:#646970;max-width:200px">${esc((p.notes||'').substring(0,80))}</td>
-			<td style="white-space:nowrap">
-				<select class="wo-status-select" data-id="${p.id}" style="font-size:12px">
+			<td style="font-size:12px;vertical-align:top;padding-top:10px">${esc(p.budget||'')}</td>
+			<td style="font-size:12px;color:#646970;vertical-align:top;padding-top:10px">${esc(p.source||'')}</td>
+			<td style="vertical-align:top;padding-top:9px"><span class="wo-badge" style="background:${c}18;color:${c}">${esc(p.status)}</span></td>
+			<td style="font-size:12px;color:#646970;max-width:180px;vertical-align:top;padding-top:10px">${esc((p.notes||'').substring(0,80))}</td>
+			<td style="white-space:nowrap;vertical-align:top;padding-top:8px">
+				<button class="button button-small wo-view-btn" data-id="${p.id}">View ↓</button>
+				<select class="wo-status-select" data-id="${p.id}" style="font-size:12px;margin-left:4px">
 					${['draft','sent','won','lost','declined'].map(s=>`<option value="${s}"${s===p.status?' selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
 				</select>
-				<button class="button button-small wo-delete-proposal-btn" data-id="${p.id}" style="color:#cc1818;border-color:#cc1818;margin-left:4px">×</button>
+				<button class="button button-small wo-delete-proposal-btn" data-id="${p.id}" style="color:#cc1818;border-color:#cc181833;margin-left:4px">×</button>
 			</td>
 		`;
-		tbody.insertBefore(tr, tbody.firstChild);
+
+		const detail = document.createElement('tr');
+		detail.id = 'wo-detail-' + p.id;
+		detail.style.display = 'none';
+		detail.innerHTML = `
+			<td colspan="7" style="padding:0;border-top:none">
+				<div style="background:#f8f9fa;border-top:2px solid #2271b1;padding:20px 24px 24px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+					${p.notes ? `<div>
+						<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#8c8f94;margin-bottom:8px">Notes</div>
+						<div style="font-size:13px;color:#1d2327;line-height:1.65;white-space:pre-wrap">${esc(p.notes)}</div>
+					</div>` : ''}
+					${p.draft ? `<div>
+						<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+							<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#8c8f94">Draft</span>
+							<button class="button button-small wo-copy-draft-btn" data-id="${p.id}">Copy</button>
+						</div>
+						<div style="font-size:13px;color:#1d2327;line-height:1.65;white-space:pre-wrap;max-height:300px;overflow-y:auto;background:#fff;border:1px solid #dcdcde;border-radius:4px;padding:12px 14px">${esc(p.draft)}</div>
+					</div>` : ''}
+					${!p.notes && !p.draft ? '<div style="grid-column:1/-1;color:#646970;font-size:13px">No notes or draft saved yet.</div>' : ''}
+				</div>
+			</td>
+		`;
+
+		tbody.insertBefore(detail, tbody.firstChild);
+		tbody.insertBefore(tr, detail);
 		attachRowEvents(tr);
+
+		// wire up copy button on the detail row
+		const copyBtn = detail.querySelector('.wo-copy-draft-btn');
+		if (copyBtn) copyBtn.addEventListener('click', function() {
+			const draftEl = this.closest('div').nextElementSibling;
+			if (!draftEl) return;
+			navigator.clipboard.writeText(draftEl.textContent.trim()).then(() => {
+				this.textContent = 'Copied!';
+				setTimeout(() => this.textContent = 'Copy', 1500);
+			});
+		});
 	}
 
 	function esc(s) {
@@ -599,6 +677,26 @@ $status_colors = array(
 			});
 		});
 
+		const viewBtn = tr.querySelector('.wo-view-btn');
+		if (viewBtn) viewBtn.addEventListener('click', function() {
+			const id      = this.dataset.id;
+			const detail  = document.getElementById('wo-detail-' + id);
+			if (!detail) return;
+			const open = detail.style.display !== 'none';
+			detail.style.display = open ? 'none' : '';
+			this.textContent     = open ? 'View ↓' : 'Hide ↑';
+		});
+
+		const copyBtn = tr.nextElementSibling && tr.nextElementSibling.querySelector && tr.nextElementSibling.querySelector('.wo-copy-draft-btn');
+		if (copyBtn) copyBtn.addEventListener('click', function() {
+			const draftEl = this.closest('div').nextElementSibling;
+			if (!draftEl) return;
+			navigator.clipboard.writeText(draftEl.textContent.trim()).then(() => {
+				this.textContent = 'Copied!';
+				setTimeout(() => this.textContent = 'Copy', 1500);
+			});
+		});
+
 		const btn = tr.querySelector('.wo-delete-proposal-btn');
 		if (btn) btn.addEventListener('click', async function() {
 			if (!confirm('Delete this proposal?')) return;
@@ -607,11 +705,25 @@ $status_colors = array(
 				method: 'DELETE',
 				headers: { 'X-WP-Nonce': cfg.nonce },
 			});
-			const row = document.getElementById('wo-proposal-' + id);
-			if (row) row.remove();
+			const row    = document.getElementById('wo-proposal-' + id);
+			const detail = document.getElementById('wo-detail-' + id);
+			if (row)    row.remove();
+			if (detail) detail.remove();
 		});
 	}
 
-	document.querySelectorAll('#wo-proposals-table tr[id]').forEach(attachRowEvents);
+	document.querySelectorAll('#wo-proposals-table tr[id^="wo-proposal-"]').forEach(attachRowEvents);
+
+	// Wire copy buttons on PHP-rendered detail rows
+	document.querySelectorAll('.wo-copy-draft-btn').forEach(btn => {
+		btn.addEventListener('click', function() {
+			const draftEl = this.closest('div').nextElementSibling;
+			if (!draftEl) return;
+			navigator.clipboard.writeText(draftEl.textContent.trim()).then(() => {
+				this.textContent = 'Copied!';
+				setTimeout(() => this.textContent = 'Copy', 1500);
+			});
+		});
+	});
 })();
 </script>

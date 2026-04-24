@@ -13,6 +13,7 @@ class WorkOS_Router {
 		require_once WORK_OS_PATH . 'includes/api/class-research.php';
 		require_once WORK_OS_PATH . 'includes/api/class-proposals.php';
 		require_once WORK_OS_PATH . 'includes/api/class-blog.php';
+		require_once WORK_OS_PATH . 'includes/api/class-documents.php';
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
@@ -89,6 +90,21 @@ class WorkOS_Router {
 		register_rest_route( 'work-os/v1', '/proposals/(?P<id>\d+)', array(
 			array( 'methods' => 'POST',   'callback' => array( 'WorkOS_Proposals', 'update_proposal' ), 'permission_callback' => $auth ),
 			array( 'methods' => 'DELETE', 'callback' => array( 'WorkOS_Proposals', 'delete_proposal' ), 'permission_callback' => $auth ),
+		) );
+
+		// Documents
+		register_rest_route( 'work-os/v1', '/documents', array(
+			array( 'methods' => 'GET',  'callback' => array( 'WorkOS_Documents', 'list_docs' ), 'permission_callback' => $auth ),
+			array( 'methods' => 'POST', 'callback' => array( 'WorkOS_Documents', 'add_doc' ),   'permission_callback' => $auth ),
+		) );
+
+		register_rest_route( 'work-os/v1', '/documents/(?P<id>\d+)', array(
+			'methods'             => 'DELETE',
+			'callback'            => array( 'WorkOS_Documents', 'delete_doc' ),
+			'permission_callback' => $auth,
+			'args'                => array(
+				'id' => array( 'validate_callback' => fn( $v ) => is_numeric( $v ) ),
+			),
 		) );
 
 		// Blog

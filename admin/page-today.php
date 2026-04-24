@@ -28,7 +28,7 @@ $status_colors = array(
 	</h1>
 	<hr class="wp-header-end">
 
-	<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:980px;margin-top:20px">
+	<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
 
 		<!-- Active Proposals -->
 		<div class="postbox">
