@@ -63,20 +63,21 @@ $kind_colors = array(
 			</thead>
 			<tbody>
 				<?php if ( empty( $events ) ) : ?>
-					<tr><td colspan="5" style="color:#646970;padding:20px">No events yet. Add one above.</td></tr>
+					<tr><td colspan="5" style="color:#646970;padding:24px 16px;font-size:13px">No events yet. Add one above.</td></tr>
 				<?php else : ?>
-					<?php foreach ( $events as $ev ) : ?>
+					<?php foreach ( $events as $ev ) :
+						$kc = $kind_colors[ $ev['kind'] ] ?? '#646970'; ?>
 						<tr id="wo-event-<?php echo (int) $ev['id']; ?>">
-							<td style="white-space:nowrap;color:#646970;font-size:12px"><?php echo esc_html( substr( $ev['created_at'], 0, 10 ) ); ?></td>
-							<td>
-								<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;text-transform:uppercase;background:<?php echo esc_attr( $kind_colors[ $ev['kind'] ] ?? '#646970' ); ?>22;color:<?php echo esc_attr( $kind_colors[ $ev['kind'] ] ?? '#646970' ); ?>">
+							<td style="white-space:nowrap;color:#8c8f94;font-size:12px;vertical-align:top;padding-top:10px"><?php echo esc_html( substr( $ev['created_at'], 0, 10 ) ); ?></td>
+							<td style="vertical-align:top;padding-top:9px">
+								<span class="wo-badge" style="background:<?php echo esc_attr( $kc ); ?>18;color:<?php echo esc_attr( $kc ); ?>">
 									<?php echo esc_html( $ev['kind'] ); ?>
 								</span>
 							</td>
-							<td><?php echo esc_html( $ev['note'] ); ?></td>
-							<td style="color:#646970;font-size:12px"><?php echo esc_html( $ev['tags'] ); ?></td>
+							<td style="font-size:13px;line-height:1.55"><?php echo esc_html( $ev['note'] ); ?></td>
+							<td style="color:#8c8f94;font-size:12px"><?php echo esc_html( $ev['tags'] ); ?></td>
 							<td>
-								<button class="button button-small wo-delete-btn" data-id="<?php echo (int) $ev['id']; ?>" style="color:#cc1818;border-color:#cc1818">Delete</button>
+								<button class="button button-small wo-delete-btn" data-id="<?php echo (int) $ev['id']; ?>" style="color:#cc1818;border-color:#cc181833">×</button>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -117,12 +118,13 @@ $kind_colors = array(
 
 			const tr = document.createElement('tr');
 			tr.id = 'wo-event-' + data.id;
+			const kc = colors[data.kind] || '#646970';
 			tr.innerHTML = `
-				<td style="white-space:nowrap;color:#646970;font-size:12px">${data.created_at.substring(0,10)}</td>
-				<td><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;text-transform:uppercase;background:${colors[data.kind]||'#646970'}22;color:${colors[data.kind]||'#646970'}">${data.kind}</span></td>
-				<td>${data.note.replace(/</g,'&lt;')}</td>
-				<td style="color:#646970;font-size:12px">${(data.tags||'').replace(/</g,'&lt;')}</td>
-				<td><button class="button button-small wo-delete-btn" data-id="${data.id}" style="color:#cc1818;border-color:#cc1818">Delete</button></td>
+				<td style="white-space:nowrap;color:#8c8f94;font-size:12px;vertical-align:top;padding-top:10px">${data.created_at.substring(0,10)}</td>
+				<td style="vertical-align:top;padding-top:9px"><span class="wo-badge" style="background:${kc}18;color:${kc}">${data.kind}</span></td>
+				<td style="font-size:13px;line-height:1.55">${data.note.replace(/</g,'&lt;')}</td>
+				<td style="color:#8c8f94;font-size:12px">${(data.tags||'').replace(/</g,'&lt;')}</td>
+				<td><button class="button button-small wo-delete-btn" data-id="${data.id}" style="color:#cc1818;border-color:#cc181833">×</button></td>
 			`;
 			tbody.insertBefore( tr, tbody.firstChild );
 

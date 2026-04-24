@@ -19,6 +19,67 @@ class WorkOS_Proposals {
 		return rest_ensure_response( $rows );
 	}
 
+	public static function extract_proposal( WP_REST_Request $request ) {
+		$claude_key = WorkOS_Settings::get_claude_key();
+		if ( ! $claude_key ) {
+			return new WP_Error( 'no_key', 'Claude API key not configured.', array( 'status' => 400 ) );
+		}
+
+		$raw_text = sanitize_textarea_field( $request->get_param( 'raw_text' ) );
+		if ( ! $raw_text ) {
+			return new WP_Error( 'missing_param', 'raw_text is required.', array( 'status' => 400 ) );
+		}
+
+		$prompt = "Extract key details from this job posting or message. Return ONLY valid JSON, no other text, no markdown code fences.\n\nText:\n" . $raw_text . "\n\nReturn exactly this JSON structure:\n{\"title\":\"job title\",\"company\":\"company or client name\",\"budget\":\"budget or rate if mentioned, empty string if not\",\"source\":\"upwork|linkedin|direct|other\",\"job_url\":\"URL if present in text, empty string otherwise\",\"language\":\"de|en\",\"notes\":\"2-3 sentence summary: what they need, key requirements, tech stack mentioned\",\"red_flags\":\"any concerns about scope, budget, or client, empty string if none\"}";
+
+		$response = wp_remote_post(
+			'https://api.anthropic.com/v1/messages',
+			array(
+				'timeout' => 30,
+				'headers' => array(
+					'Content-Type'      => 'application/json',
+					'x-api-key'         => $claude_key,
+					'anthropic-version' => '2023-06-01',
+				),
+				'body' => wp_json_encode( array(
+					'model'      => 'claude-sonnet-4-6',
+					'max_tokens' => 600,
+					'messages'   => array(
+						array( 'role' => 'user', 'content' => $prompt ),
+					),
+				) ),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return new WP_Error( 'api_error', $response->get_error_message(), array( 'status' => 502 ) );
+		}
+
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+		$text = $body['content'][0]['text'] ?? '';
+
+		if ( ! $text ) {
+			return new WP_Error( 'claude_error', $body['error']['message'] ?? 'No response from Claude.', array( 'status' => 502 ) );
+		}
+
+		// Strip code fences if Claude wrapped the JSON
+		$text = preg_replace( '/^```(?:json)?\s*/m', '', $text );
+		$text = preg_replace( '/\s*```\s*$/m', '', $text );
+
+		$extracted = json_decode( trim( $text ), true );
+		if ( ! $extracted ) {
+			if ( preg_match( '/\{.*\}/s', $text, $matches ) ) {
+				$extracted = json_decode( $matches[0], true );
+			}
+		}
+
+		if ( ! $extracted ) {
+			return new WP_Error( 'parse_error', 'Could not parse extraction. Try simplifying the pasted text.', array( 'status' => 502 ) );
+		}
+
+		return rest_ensure_response( $extracted );
+	}
+
 	public static function create_proposal( WP_REST_Request $request ) {
 		global $wpdb;
 
@@ -36,15 +97,19 @@ class WorkOS_Proposals {
 		$wpdb->insert(
 			$wpdb->prefix . 'work_os_proposals',
 			array(
-				'title'   => $title,
-				'company' => sanitize_text_field( $request->get_param( 'company' ) ?? '' ),
-				'budget'  => sanitize_text_field( $request->get_param( 'budget' ) ?? '' ),
-				'source'  => $source,
-				'status'  => $status,
-				'job_url' => esc_url_raw( $request->get_param( 'job_url' ) ?? '' ),
-				'notes'   => sanitize_textarea_field( $request->get_param( 'notes' ) ?? '' ),
+				'title'    => $title,
+				'company'  => sanitize_text_field( $request->get_param( 'company' ) ?? '' ),
+				'budget'   => sanitize_text_field( $request->get_param( 'budget' ) ?? '' ),
+				'source'   => $source,
+				'status'   => $status,
+				'job_url'  => esc_url_raw( $request->get_param( 'job_url' ) ?? '' ),
+				'notes'    => sanitize_textarea_field( $request->get_param( 'notes' ) ?? '' ),
+				'raw_text' => sanitize_textarea_field( $request->get_param( 'raw_text' ) ?? '' ),
+				'research' => sanitize_textarea_field( $request->get_param( 'research' ) ?? '' ),
+				'draft'    => sanitize_textarea_field( $request->get_param( 'draft' ) ?? '' ),
+				'analysis' => sanitize_textarea_field( $request->get_param( 'analysis' ) ?? '' ),
 			),
-			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
 
 		$id  = $wpdb->insert_id;
@@ -120,10 +185,12 @@ class WorkOS_Proposals {
 			return new WP_Error( 'no_key', 'Claude API key not configured.', array( 'status' => 400 ) );
 		}
 
-		$title   = sanitize_text_field( $request->get_param( 'title' ) ?? '' );
-		$company = sanitize_text_field( $request->get_param( 'company' ) ?? '' );
-		$budget  = sanitize_text_field( $request->get_param( 'budget' ) ?? '' );
-		$notes   = sanitize_textarea_field( $request->get_param( 'notes' ) ?? '' );
+		$title            = sanitize_text_field( $request->get_param( 'title' ) ?? '' );
+		$company          = sanitize_text_field( $request->get_param( 'company' ) ?? '' );
+		$budget           = sanitize_text_field( $request->get_param( 'budget' ) ?? '' );
+		$notes            = sanitize_textarea_field( $request->get_param( 'notes' ) ?? '' );
+		$research_context = sanitize_textarea_field( $request->get_param( 'research_context' ) ?? '' );
+		$fit_analysis     = sanitize_textarea_field( $request->get_param( 'fit_analysis' ) ?? '' );
 
 		$profile_response = WorkOS_Profile::get();
 		$profile          = $profile_response instanceof WP_REST_Response ? $profile_response->get_data() : array(
@@ -158,8 +225,10 @@ class WorkOS_Proposals {
 		if ( $company ) $prompt .= "Company/Client: {$company}\n";
 		if ( $budget )  $prompt .= "Budget: {$budget}\n";
 		if ( $notes )   $prompt .= "Context: {$notes}\n";
+		if ( $research_context ) $prompt .= "\nCompany research:\n{$research_context}\n";
+		if ( $fit_analysis )     $prompt .= "\nFit analysis:\n{$fit_analysis}\n";
 		$prompt .= "\nCandidate:\n{$profile_ctx}\n\n";
-		$prompt .= "Rules:\n- No AI filler (no 'I am thrilled', 'hope this finds you well')\n- Direct and specific\n- Reference at least one concrete past project\n- Under 200 words\n- If it looks like a German-speaking client, write in formal German (Sie)\n- End with a clear next step";
+		$prompt .= "Rules:\n- No AI filler (no 'I am thrilled', 'hope this finds you well', 'I came across')\n- Direct and specific\n- Reference at least one concrete past project or client result\n- Under 200 words\n- If it looks like a German-speaking client, write in formal German (Sie)\n- Use the company research to show you understand their business\n- End with a clear, low-friction next step";
 
 		$response = wp_remote_post(
 			'https://api.anthropic.com/v1/messages',
@@ -171,7 +240,7 @@ class WorkOS_Proposals {
 					'anthropic-version' => '2023-06-01',
 				),
 				'body' => wp_json_encode( array(
-					'model'      => 'claude-opus-4-7',
+					'model'      => 'claude-sonnet-4-6',
 					'max_tokens' => 800,
 					'messages'   => array(
 						array( 'role' => 'user', 'content' => $prompt ),

@@ -10,12 +10,37 @@ if ( isset( $_POST['work_os_settings_nonce'] ) && wp_verify_nonce( $_POST['work_
 		update_option( 'work_os_gemini_key', sanitize_text_field( $_POST['gemini_key'] ) );
 	}
 
+	// CV & Contact
+	if ( isset( $_POST['cv_phone'] ) ) {
+		update_option( 'work_os_cv_phone', sanitize_text_field( $_POST['cv_phone'] ) );
+	}
+	if ( isset( $_POST['cv_email'] ) ) {
+		update_option( 'work_os_cv_email', sanitize_email( $_POST['cv_email'] ) );
+	}
+	if ( isset( $_POST['cv_address'] ) ) {
+		update_option( 'work_os_cv_address', sanitize_text_field( $_POST['cv_address'] ) );
+	}
+	if ( isset( $_POST['cv_linkedin'] ) ) {
+		update_option( 'work_os_cv_linkedin', esc_url_raw( $_POST['cv_linkedin'] ) );
+	}
+	if ( isset( $_POST['cv_github'] ) ) {
+		update_option( 'work_os_cv_github', esc_url_raw( $_POST['cv_github'] ) );
+	}
+
 	// Upwork
 	if ( isset( $_POST['upwork_client_id'] ) ) {
 		update_option( 'work_os_upwork_client_id', sanitize_text_field( $_POST['upwork_client_id'] ) );
 	}
 	if ( isset( $_POST['upwork_client_secret'] ) && strpos( $_POST['upwork_client_secret'], '*' ) === false ) {
 		update_option( 'work_os_upwork_client_secret', sanitize_text_field( $_POST['upwork_client_secret'] ) );
+	}
+
+	// LinkedIn
+	if ( isset( $_POST['linkedin_client_id'] ) ) {
+		update_option( 'work_os_linkedin_client_id', sanitize_text_field( $_POST['linkedin_client_id'] ) );
+	}
+	if ( isset( $_POST['linkedin_client_secret'] ) && strpos( $_POST['linkedin_client_secret'], '*' ) === false ) {
+		update_option( 'work_os_linkedin_client_secret', sanitize_text_field( $_POST['linkedin_client_secret'] ) );
 	}
 
 	// Voice / rate constants
@@ -34,8 +59,15 @@ if ( isset( $_POST['work_os_settings_nonce'] ) && wp_verify_nonce( $_POST['work_
 
 $claude_key           = get_option( 'work_os_claude_key', '' );
 $gemini_key           = get_option( 'work_os_gemini_key', '' );
+$cv_phone             = get_option( 'work_os_cv_phone', '' );
+$cv_email             = get_option( 'work_os_cv_email', get_option( 'admin_email' ) );
+$cv_address           = get_option( 'work_os_cv_address', '' );
+$cv_linkedin          = get_option( 'work_os_cv_linkedin', '' );
+$cv_github            = get_option( 'work_os_cv_github', '' );
 $upwork_client_id     = get_option( 'work_os_upwork_client_id', '' );
 $upwork_client_secret = get_option( 'work_os_upwork_client_secret', '' );
+$linkedin_client_id     = get_option( 'work_os_linkedin_client_id', '' );
+$linkedin_client_secret = get_option( 'work_os_linkedin_client_secret', '' );
 $voice_rate           = get_option( 'work_os_voice_rate', '€38/hr' );
 $voice_niche          = get_option( 'work_os_voice_niche', 'WordPress / WooCommerce' );
 $voice_tagline        = get_option( 'work_os_voice_tagline', '' );
@@ -51,6 +83,51 @@ function work_os_mask( $key ) {
 
 	<form method="post">
 		<?php wp_nonce_field( 'work_os_save_settings', 'work_os_settings_nonce' ); ?>
+
+		<h2 class="title">CV &amp; Contact</h2>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row"><label for="cv_phone">Phone</label></th>
+				<td>
+					<input type="text" id="cv_phone" name="cv_phone" class="regular-text"
+						value="<?php echo esc_attr( $cv_phone ); ?>"
+						placeholder="+43 676 391 0128">
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="cv_email">CV Email</label></th>
+				<td>
+					<input type="email" id="cv_email" name="cv_email" class="regular-text"
+						value="<?php echo esc_attr( $cv_email ); ?>"
+						placeholder="kontakt@edrishusein.com">
+					<p class="description">Used on CV (separate from WordPress admin email).</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="cv_address">Address</label></th>
+				<td>
+					<input type="text" id="cv_address" name="cv_address" class="regular-text"
+						value="<?php echo esc_attr( $cv_address ); ?>"
+						placeholder="Mitteldorfgasse 1a, 6850 Dornbirn, Österreich">
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="cv_linkedin">LinkedIn URL</label></th>
+				<td>
+					<input type="url" id="cv_linkedin" name="cv_linkedin" class="regular-text"
+						value="<?php echo esc_attr( $cv_linkedin ); ?>"
+						placeholder="https://linkedin.com/in/edris-husein">
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="cv_github">GitHub URL</label></th>
+				<td>
+					<input type="url" id="cv_github" name="cv_github" class="regular-text"
+						value="<?php echo esc_attr( $cv_github ); ?>"
+						placeholder="https://github.com/Husein-Edris">
+				</td>
+			</tr>
+		</table>
 
 		<h2 class="title">AI Keys</h2>
 		<table class="form-table" role="presentation">
@@ -107,6 +184,32 @@ function work_os_mask( $key ) {
 							<span style="color:#00a32a">&#10003; Secret set</span>
 						<?php else : ?>
 							OAuth credentials for Upwork API access.
+						<?php endif; ?>
+					</p>
+				</td>
+			</tr>
+		</table>
+
+		<h2 class="title">LinkedIn API</h2>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row"><label for="linkedin_client_id">LinkedIn Client ID</label></th>
+				<td>
+					<input type="text" id="linkedin_client_id" name="linkedin_client_id" class="regular-text"
+						value="<?php echo esc_attr( $linkedin_client_id ); ?>">
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="linkedin_client_secret">LinkedIn Client Secret</label></th>
+				<td>
+					<input type="password" id="linkedin_client_secret" name="linkedin_client_secret" class="regular-text"
+						value="<?php echo esc_attr( work_os_mask( $linkedin_client_secret ) ); ?>"
+						autocomplete="new-password">
+					<p class="description">
+						<?php if ( $linkedin_client_secret ) : ?>
+							<span style="color:#00a32a">&#10003; Secret set</span>
+						<?php else : ?>
+							OAuth credentials for LinkedIn API access.
 						<?php endif; ?>
 					</p>
 				</td>

@@ -26,7 +26,7 @@ class WorkOS_Research {
 		$prompt .= "Provide a structured overview:\n1. What they do (products, services, market)\n2. Technology stack signals\n3. Current job openings (if any)\n4. Key people (founders, tech leads)\n5. Recent news or activity\n6. Company size and location\n\nBe specific and factual.";
 
 		$response = wp_remote_post(
-			'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . rawurlencode( $gemini_key ),
+			'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . rawurlencode( $gemini_key ),
 			array(
 				'timeout' => 30,
 				'headers' => array( 'Content-Type' => 'application/json' ),
@@ -54,7 +54,19 @@ class WorkOS_Research {
 			return new WP_Error( 'gemini_error', $error_msg, array( 'status' => 502 ) );
 		}
 
-		return rest_ensure_response( array( 'output' => $text ) );
+		global $wpdb;
+		$wpdb->insert(
+			$wpdb->prefix . 'work_os_research_log',
+			array(
+				'company'         => $company,
+				'job_description' => $job_desc,
+				'research_output' => $text,
+			),
+			array( '%s', '%s', '%s' )
+		);
+		$log_id = $wpdb->insert_id;
+
+		return rest_ensure_response( array( 'output' => $text, 'log_id' => $log_id ) );
 	}
 
 	public static function analyse( WP_REST_Request $request ) {
@@ -101,7 +113,7 @@ class WorkOS_Research {
 					'anthropic-version' => '2023-06-01',
 				),
 				'body' => wp_json_encode( array(
-					'model'      => 'claude-opus-4-7',
+					'model'      => 'claude-sonnet-4-6',
 					'max_tokens' => 1500,
 					'messages'   => array(
 						array( 'role' => 'user', 'content' => $prompt ),
@@ -122,7 +134,30 @@ class WorkOS_Research {
 			return new WP_Error( 'claude_error', $error_msg, array( 'status' => 502 ) );
 		}
 
+		$log_id = absint( $request->get_param( 'log_id' ) ?? 0 );
+		if ( $log_id ) {
+			global $wpdb;
+			$wpdb->update(
+				$wpdb->prefix . 'work_os_research_log',
+				array( 'analysis_output' => $text ),
+				array( 'id' => $log_id ),
+				array( '%s' ),
+				array( '%d' )
+			);
+		}
+
 		return rest_ensure_response( array( 'output' => $text ) );
+	}
+
+	public static function list_logs() {
+		global $wpdb;
+		$rows = $wpdb->get_results(
+			"SELECT id, created_at, company, LEFT(research_output,200) as preview, analysis_output != '' as has_analysis
+			 FROM {$wpdb->prefix}work_os_research_log
+			 ORDER BY created_at DESC LIMIT 20",
+			ARRAY_A
+		) ?: array();
+		return rest_ensure_response( $rows );
 	}
 
 	private static function get_profile_context() {

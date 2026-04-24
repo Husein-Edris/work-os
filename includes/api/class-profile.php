@@ -21,8 +21,10 @@ class WorkOS_Profile {
 		if ( $about_page ) {
 			$pid = $about_page->ID;
 
-			$headline = get_field( 'about_hero_subtitle', $pid ) ?: get_bloginfo( 'description' );
-			$summary  = get_field( 'about_hero_subtitle', $pid ) ?: '';
+			$headline = get_field( 'about_hero_subtitle', $pid ) ?: 'WordPress & PHP Developer';
+			$summary  = get_field( 'about_summary', $pid )
+				?: get_field( 'about_intro_text', $pid )
+				?: '';
 
 			$items = get_field( 'experience_items', $pid );
 			if ( is_array( $items ) ) {
@@ -30,7 +32,14 @@ class WorkOS_Profile {
 					$tech = array();
 					if ( ! empty( $item['technologies'] ) ) {
 						foreach ( (array) $item['technologies'] as $t ) {
-							$tech[] = is_object( $t ) ? $t->post_title : (string) $t;
+							if ( is_object( $t ) ) {
+								$tech[] = $t->post_title;
+							} elseif ( is_numeric( $t ) ) {
+								$post = get_post( (int) $t );
+								if ( $post ) $tech[] = $post->post_title;
+							} else {
+								$tech[] = (string) $t;
+							}
 						}
 					}
 					$experience[] = array(
@@ -51,17 +60,50 @@ class WorkOS_Profile {
 			}
 		}
 
+		// Technical skills from the 'tech' CPT
+		$tech_skill_posts = get_posts( array(
+			'post_type'      => 'tech',
+			'posts_per_page' => -1,
+			'post_status'    => 'publish',
+			'orderby'        => 'title',
+			'order'          => 'ASC',
+		) );
+		$tech_skills = array_map( fn( $p ) => $p->post_title, $tech_skill_posts );
+
+		// Static education — update via Settings once ACF fields are added
+		$education = array(
+			array(
+				'degree'      => 'Diploma in Full Stack Web Development',
+				'institution' => 'Instant Software Solution',
+				'period'      => 'Oct 2021 – Aug 2022',
+			),
+			array(
+				'degree'      => 'Ausbildung Medienfachmann (Apprenticeship)',
+				'institution' => 'bobdo.com GmbH · Landesberufsschule Bregenz 2',
+				'period'      => '2019 – 2021',
+			),
+		);
+
+		$languages = array(
+			array( 'language' => 'Kurdish', 'level' => 'Native' ),
+			array( 'language' => 'German',  'level' => 'C1 – Fluent' ),
+			array( 'language' => 'English', 'level' => 'C1 – Fluent' ),
+		);
+
 		$projects = self::get_projects();
 
 		return rest_ensure_response( array(
-			'name'       => get_bloginfo( 'name' ) ?: 'Edris Husein',
-			'headline'   => 'WordPress & PHP Developer',
-			'location'   => 'Dornbirn, Österreich',
-			'email'      => get_option( 'admin_email' ),
-			'summary'    => $summary,
-			'experience' => $experience,
-			'skills'     => $skills,
-			'projects'   => $projects,
+			'name'        => get_bloginfo( 'name' ) ?: 'Edris Husein',
+			'headline'    => $headline,
+			'location'    => 'Dornbirn, Österreich',
+			'email'       => get_option( 'admin_email' ),
+			'summary'     => $summary,
+			'experience'  => $experience,
+			'skills'      => $skills,
+			'tech_skills' => $tech_skills,
+			'projects'    => $projects,
+			'education'   => $education,
+			'languages'   => $languages,
 		) );
 	}
 
@@ -95,7 +137,14 @@ class WorkOS_Profile {
 			$raw_tech = get_field( 'tech_stack', $post->ID );
 			if ( is_array( $raw_tech ) ) {
 				foreach ( $raw_tech as $t ) {
-					$tech[] = is_object( $t ) ? $t->post_title : (string) $t;
+					if ( is_object( $t ) ) {
+						$tech[] = $t->post_title;
+					} elseif ( is_numeric( $t ) ) {
+						$post_obj = get_post( (int) $t );
+						if ( $post_obj ) $tech[] = $post_obj->post_title;
+					} else {
+						$tech[] = (string) $t;
+					}
 				}
 			}
 

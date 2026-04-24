@@ -42,6 +42,20 @@ class WorkOS_DB {
 			status varchar(50) NOT NULL DEFAULT 'draft',
 			job_url text DEFAULT '',
 			notes text DEFAULT '',
+			raw_text longtext DEFAULT '',
+			research longtext DEFAULT '',
+			draft longtext DEFAULT '',
+			analysis longtext DEFAULT '',
+			PRIMARY KEY (id)
+		) $charset;" );
+
+		dbDelta( "CREATE TABLE {$wpdb->prefix}work_os_research_log (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+			company varchar(255) DEFAULT '',
+			job_description text DEFAULT '',
+			research_output longtext DEFAULT '',
+			analysis_output longtext DEFAULT '',
 			PRIMARY KEY (id)
 		) $charset;" );
 

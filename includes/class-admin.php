@@ -45,8 +45,81 @@ class WorkOS_Admin {
 			return;
 		}
 
-		// Inline print CSS for CV export
+		// Shared Work OS admin styles
 		wp_add_inline_style( 'wp-admin', '
+			/* ── Shared output areas ── */
+			.wo-output {
+				font-size: 13px;
+				line-height: 1.75;
+				color: #1d2327;
+				background: #f8f9fa;
+				border: 1px solid #dcdcde;
+				border-radius: 4px;
+				padding: 16px 20px;
+				overflow-y: auto;
+			}
+			.wo-output h2 { font-size: 15px; margin: 16px 0 6px; font-weight: 700; }
+			.wo-output h3 { font-size: 14px; margin: 14px 0 4px; font-weight: 700; }
+			.wo-output h4 { font-size: 13px; margin: 12px 0 4px; font-weight: 700; }
+			.wo-output p  { margin: 4px 0; }
+			.wo-output ul { margin: 4px 0 4px 20px; padding: 0; }
+			.wo-output li { margin-bottom: 2px; }
+
+			/* ── Status badge ── */
+			.wo-badge {
+				display: inline-block;
+				padding: 2px 9px;
+				border-radius: 10px;
+				font-size: 11px;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 0.04em;
+			}
+
+			/* ── Hover rows ── */
+			#wo-proposals-table tbody tr { transition: background 0.12s; }
+			#wo-proposals-table tbody tr:hover td { background: #f6f7f7; }
+			.wo-log-item { transition: background 0.12s; cursor: pointer; }
+			.wo-log-item:hover { background: #f6f7f7 !important; }
+
+			/* ── Button micro-interactions ── */
+			.button, .button-primary { transition: opacity 0.15s, transform 0.1s; }
+			.button:active, .button-primary:active { transform: scale(0.985); }
+
+			/* ── Pulse on draft btn ── */
+			#wo-draft-btn.wo-pulse {
+				box-shadow: 0 0 0 3px #2271b1, 0 0 0 6px #c7dff7;
+				transition: box-shadow 0.2s ease;
+			}
+
+			/* ── Step label ── */
+			.wo-step-number {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				background: #2271b1;
+				color: #fff;
+				font-size: 11px;
+				font-weight: 700;
+				margin-right: 7px;
+				flex-shrink: 0;
+			}
+			.postbox-header .hndle.wo-step-heading {
+				display: flex;
+				align-items: center;
+			}
+
+			/* ── Reduced motion ── */
+			@media (prefers-reduced-motion: reduce) {
+				.button, .button-primary { transition: none; }
+				.button:active, .button-primary:active { transform: none; }
+				.wo-log-item { transition: none; }
+			}
+
+			/* ── Print CSS for CV ── */
 			@media print {
 				#wpadminbar, #adminmenuwrap, #adminmenuback,
 				.wo-no-print, .wo-actions, h1.wp-heading-inline,
@@ -56,16 +129,14 @@ class WorkOS_Admin {
 			}
 		' );
 
-		// Pass nonce + REST URL for inline AJAX
-		wp_add_inline_script( 'wp-api', sprintf(
-			'window.workOsConfig = %s;',
-			wp_json_encode( array(
-				'apiUrl' => rest_url( 'work-os/v1' ),
-				'nonce'  => wp_create_nonce( 'wp_rest' ),
-			) )
-		), 'before' );
-
-		wp_enqueue_script( 'wp-api' );
+		// Output config before any page scripts render
+		$config = wp_json_encode( array(
+			'apiUrl' => rest_url( 'work-os/v1' ),
+			'nonce'  => wp_create_nonce( 'wp_rest' ),
+		) );
+		add_action( 'admin_print_scripts', static function() use ( $config ) {
+			echo '<script>window.workOsConfig = ' . $config . ';</script>' . "\n";
+		} );
 	}
 
 	public function page_today() {

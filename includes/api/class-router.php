@@ -48,6 +48,13 @@ class WorkOS_Router {
 			),
 		) );
 
+		// Research log
+		register_rest_route( 'work-os/v1', '/research/log', array(
+			'methods'             => 'GET',
+			'callback'            => array( 'WorkOS_Research', 'list_logs' ),
+			'permission_callback' => $auth,
+		) );
+
 		// Research + fit analysis
 		register_rest_route( 'work-os/v1', '/research', array(
 			'methods'             => 'POST',
@@ -65,6 +72,12 @@ class WorkOS_Router {
 		register_rest_route( 'work-os/v1', '/proposals', array(
 			array( 'methods' => 'GET',  'callback' => array( 'WorkOS_Proposals', 'list_proposals' ),  'permission_callback' => $auth ),
 			array( 'methods' => 'POST', 'callback' => array( 'WorkOS_Proposals', 'create_proposal' ), 'permission_callback' => $auth ),
+		) );
+
+		register_rest_route( 'work-os/v1', '/proposals/extract', array(
+			'methods'             => 'POST',
+			'callback'            => array( 'WorkOS_Proposals', 'extract_proposal' ),
+			'permission_callback' => $auth,
 		) );
 
 		register_rest_route( 'work-os/v1', '/proposals/draft', array(

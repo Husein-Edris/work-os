@@ -121,8 +121,8 @@ $formats = array(
 					</div>
 				</div>
 				<div class="inside">
-					<div id="wo-publish-status" style="margin-bottom:10px;font-size:13px;color:#646970"></div>
-					<textarea id="wo-post-content" rows="22" class="large-text" style="font-size:13px;line-height:1.65;font-family:Georgia,serif"></textarea>
+					<div id="wo-publish-status" style="margin-bottom:10px;font-size:13px;color:#646970;min-height:20px"></div>
+					<textarea id="wo-post-content" rows="24" class="large-text" style="font-size:13px;line-height:1.7;font-family:Georgia,serif;background:#fafafa;border-color:#dcdcde"></textarea>
 				</div>
 			</div>
 		</div>

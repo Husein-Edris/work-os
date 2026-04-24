@@ -14,51 +14,66 @@ $claude_set = ! empty( get_option( 'work_os_claude_key', '' ) );
 		</div>
 	<?php endif; ?>
 
-	<div style="max-width:880px;margin-top:20px">
+	<div style="display:grid;grid-template-columns:1fr 380px;gap:20px;margin-top:20px;max-width:1100px">
 
-		<div class="postbox">
-			<div class="postbox-header"><h2 class="hndle">Company Research</h2></div>
-			<div class="inside">
-				<table class="form-table" style="margin:0">
-					<tr>
-						<th style="width:130px"><label for="wo-company">Company / Client</label></th>
-						<td><input type="text" id="wo-company" class="regular-text" placeholder="e.g. Shiftmove, Aleph, Reincarnate GmbH"></td>
-					</tr>
-					<tr>
-						<th><label for="wo-job-desc">Job description</label></th>
-						<td><textarea id="wo-job-desc" rows="4" class="large-text" placeholder="Paste the job listing or describe the role (optional)…"></textarea></td>
-					</tr>
-				</table>
-				<p>
-					<button id="wo-research-btn" class="button button-primary" <?php echo $gemini_set ? '' : 'disabled'; ?>>Research with Gemini</button>
-					<span id="wo-research-status" style="margin-left:10px;font-size:13px;color:#646970"></span>
-				</p>
-			</div>
-		</div>
+		<div>
 
-		<div id="wo-research-results" style="display:none">
 			<div class="postbox">
-				<div class="postbox-header">
-					<h2 class="hndle">Research Results</h2>
-					<div style="display:flex;gap:8px;margin:10px 12px 0 0">
-						<button id="wo-analyse-btn" class="button" <?php echo $claude_set ? '' : 'disabled title="Set Claude key in Settings"'; ?>>Analyse fit with Claude →</button>
-						<button id="wo-save-proposal-btn" class="button">Save as proposal →</button>
+				<div class="postbox-header"><h2 class="hndle">Company Research</h2></div>
+				<div class="inside">
+					<table class="form-table" style="margin:0">
+						<tr>
+							<th style="width:130px"><label for="wo-company">Company / Client</label></th>
+							<td><input type="text" id="wo-company" class="regular-text" placeholder="e.g. Shiftmove, Aleph, Reincarnate GmbH"></td>
+						</tr>
+						<tr>
+							<th><label for="wo-job-desc">Job description</label></th>
+							<td><textarea id="wo-job-desc" rows="4" class="large-text" placeholder="Paste the job listing or describe the role (optional)…"></textarea></td>
+						</tr>
+					</table>
+					<p>
+						<button id="wo-research-btn" class="button button-primary" <?php echo $gemini_set ? '' : 'disabled'; ?>>Research with Gemini</button>
+						<span id="wo-research-status" style="margin-left:10px;font-size:13px;color:#646970"></span>
+					</p>
+				</div>
+			</div>
+
+			<div id="wo-research-results" style="display:none">
+				<div class="postbox">
+					<div class="postbox-header">
+						<h2 class="hndle">Research Results</h2>
+						<div style="display:flex;gap:8px;margin:10px 12px 0 0">
+							<button id="wo-analyse-btn" class="button button-primary" <?php echo $claude_set ? '' : 'disabled title="Set Claude key in Settings"'; ?>>Analyse fit with Claude →</button>
+							<button id="wo-save-proposal-btn" class="button">Save as proposal →</button>
+						</div>
+					</div>
+					<div class="inside">
+						<div id="wo-research-output" class="wo-output" style="max-height:500px"></div>
 					</div>
 				</div>
-				<div class="inside">
-					<div id="wo-research-output" style="font-size:13px;line-height:1.7;color:#1d2327;white-space:pre-wrap;background:#f8f9fa;padding:16px;border-radius:4px;border:1px solid #c3c4c7;max-height:500px;overflow-y:auto"></div>
+			</div>
+
+			<div id="wo-analysis-wrap" style="display:none">
+				<div class="postbox">
+					<div class="postbox-header"><h2 class="hndle">Claude Fit Analysis</h2></div>
+					<div class="inside">
+						<div id="wo-analyse-status" style="margin-bottom:10px;font-size:13px;color:#646970"></div>
+						<div id="wo-analysis-output" class="wo-output" style="max-height:600px"></div>
+					</div>
 				</div>
 			</div>
+
 		</div>
 
-		<div id="wo-analysis-wrap" style="display:none">
-			<div class="postbox">
-				<div class="postbox-header"><h2 class="hndle">Claude Fit Analysis</h2></div>
-				<div class="inside">
-					<div id="wo-analyse-status" style="margin-bottom:10px;font-size:13px;color:#646970"></div>
-					<div id="wo-analysis-output" style="font-size:13px;line-height:1.7;color:#1d2327;white-space:pre-wrap;background:#f8f9fa;padding:16px;border-radius:4px;border:1px solid #c3c4c7;max-height:600px;overflow-y:auto"></div>
+		<div>
+
+			<div class="postbox" id="wo-log-box">
+				<div class="postbox-header"><h2 class="hndle">Recent Research</h2></div>
+				<div class="inside" style="padding:0" id="wo-log-list">
+					<p style="padding:16px;color:#646970;font-size:13px;margin:0">Loading…</p>
 				</div>
 			</div>
+
 		</div>
 
 	</div>
@@ -69,6 +84,29 @@ $claude_set = ! empty( get_option( 'work_os_claude_key', '' ) );
 	const cfg = window.workOsConfig;
 	let researchText = '';
 	let companyName  = '';
+
+	function renderMarkdown(text) {
+		if (!text) return '';
+		const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+		const lines = escaped.split('\n');
+		const out = [];
+		let inList = false;
+		for (const line of lines) {
+			if (/^### /.test(line)) { if(inList){out.push('</ul>');inList=false;} out.push('<h4>'+line.slice(4)+'</h4>'); continue; }
+			if (/^## /.test(line))  { if(inList){out.push('</ul>');inList=false;} out.push('<h3>'+line.slice(3)+'</h3>'); continue; }
+			if (/^# /.test(line))   { if(inList){out.push('</ul>');inList=false;} out.push('<h2>'+line.slice(2)+'</h2>'); continue; }
+			if (/^[-*] /.test(line)) { if(!inList){out.push('<ul>');inList=true;} out.push('<li>'+inline(line.slice(2))+'</li>'); continue; }
+			if (line.trim()==='') { if(inList){out.push('</ul>');inList=false;} out.push('<div style="height:5px"></div>'); continue; }
+			if(inList){out.push('</ul>');inList=false;}
+			out.push('<p>'+inline(line)+'</p>');
+		}
+		if(inList) out.push('</ul>');
+		return out.join('');
+	}
+	function inline(t) {
+		return t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+		         .replace(/`([^`]+)`/g,'<code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;font-size:12px">$1</code>');
+	}
 
 	document.getElementById('wo-research-btn').addEventListener('click', async function() {
 		const company = document.getElementById('wo-company').value.trim();
@@ -92,7 +130,7 @@ $claude_set = ! empty( get_option( 'work_os_claude_key', '' ) );
 			if ( ! res.ok ) throw new Error( data.message || 'Error' );
 
 			researchText = data.output || '';
-			document.getElementById('wo-research-output').textContent = researchText;
+			document.getElementById('wo-research-output').innerHTML = renderMarkdown(researchText);
 			document.getElementById('wo-research-results').style.display = 'block';
 			statusEl.textContent = '';
 		} catch (e) {
@@ -122,7 +160,7 @@ $claude_set = ! empty( get_option( 'work_os_claude_key', '' ) );
 			const data = await res.json();
 			if ( ! res.ok ) throw new Error( data.message || 'Error' );
 
-			outputEl.textContent = data.output || '';
+			outputEl.innerHTML = renderMarkdown(data.output || '');
 			statusEl.textContent = '';
 		} catch (e) {
 			statusEl.textContent = 'Error: ' + e.message;
@@ -137,5 +175,41 @@ $claude_set = ! empty( get_option( 'work_os_claude_key', '' ) );
 		sessionStorage.setItem('wo_prefill_proposal', JSON.stringify({ company: companyName, notes }));
 		window.location.href = '<?php echo esc_js( admin_url( 'admin.php?page=work-os-proposals' ) ); ?>';
 	});
+
+	// Load research log
+	(async function loadLog() {
+		const list = document.getElementById('wo-log-list');
+		try {
+			const res  = await fetch(cfg.apiUrl + '/research/log', { headers: {'X-WP-Nonce': cfg.nonce} });
+			const data = await res.json();
+			if (!data.length) {
+				list.innerHTML = '<p style="padding:16px;color:#646970;font-size:13px;margin:0">No research yet.</p>';
+				return;
+			}
+			list.innerHTML = data.map(r => `
+				<div style="padding:10px 14px;border-bottom:1px solid #f0f0f1;cursor:pointer" class="wo-log-item" data-company="${esc(r.company)}">
+					<div style="font-size:13px;font-weight:600">${esc(r.company)}</div>
+					<div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px">
+						<span style="font-size:11px;color:#646970">${r.created_at.substring(0,10)}</span>
+						${r.has_analysis == '1'
+							? '<span style="font-size:11px;color:#00a32a;font-weight:600">✓ analysed</span>'
+							: '<span style="font-size:11px;color:#646970">→ research only</span>'}
+					</div>
+				</div>
+			`).join('');
+			// Click to pre-fill company name
+			list.querySelectorAll('.wo-log-item').forEach(el => {
+				el.addEventListener('click', function() {
+					document.getElementById('wo-company').value = this.dataset.company;
+					document.getElementById('wo-company').focus();
+				});
+				el.addEventListener('mouseenter', function() { this.style.background = '#f6f7f7'; });
+				el.addEventListener('mouseleave', function() { this.style.background = ''; });
+			});
+		} catch(e) {
+			list.innerHTML = '<p style="padding:16px;color:#cc1818;font-size:13px;margin:0">Could not load log.</p>';
+		}
+		function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+	})();
 })();
 </script>

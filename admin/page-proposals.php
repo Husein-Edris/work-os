@@ -20,78 +20,121 @@ $status_colors = array(
 	<h1 class="wp-heading-inline">Work OS — Proposals</h1>
 	<hr class="wp-header-end">
 
-	<div style="max-width:1040px">
+	<div style="max-width:860px;margin-top:20px">
 
-		<div class="postbox" style="margin-top:20px">
-			<div class="postbox-header"><h2 class="hndle">Log proposal</h2></div>
+		<!-- STEP 1: Paste & Extract -->
+		<div class="postbox" id="wo-paste-box">
+			<div class="postbox-header" style="display:flex;justify-content:space-between;align-items:center">
+				<h2 class="hndle" id="wo-paste-heading">Step 1 — Paste job listing or message</h2>
+				<span style="margin:10px 14px 0 0;font-size:12px;color:#646970">
+					or <a href="#" id="wo-manual-link">fill manually ↓</a>
+				</span>
+			</div>
 			<div class="inside">
-				<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
-					<table class="form-table" style="margin:0">
-						<tr>
-							<th style="width:80px"><label for="wo-p-title">Title</label></th>
-							<td><input type="text" id="wo-p-title" class="large-text" placeholder="WooCommerce subscription plugin rebuild"></td>
-						</tr>
-						<tr>
-							<th><label for="wo-p-company">Client</label></th>
-							<td><input type="text" id="wo-p-company" class="regular-text" placeholder="Company or client name"></td>
-						</tr>
-						<tr>
-							<th><label for="wo-p-budget">Budget</label></th>
-							<td><input type="text" id="wo-p-budget" class="regular-text" placeholder="€1 500 or €38/hr"></td>
-						</tr>
-					</table>
-					<table class="form-table" style="margin:0">
-						<tr>
-							<th style="width:80px"><label for="wo-p-source">Source</label></th>
-							<td>
-								<select id="wo-p-source">
-									<?php foreach ( $sources as $s ) : ?>
-										<option value="<?php echo esc_attr( $s ); ?>"><?php echo esc_html( ucfirst( $s ) ); ?></option>
-									<?php endforeach; ?>
-								</select>
-							</td>
-						</tr>
-						<tr>
-							<th><label for="wo-p-status">Status</label></th>
-							<td>
-								<select id="wo-p-status">
-									<?php foreach ( $statuses as $s ) : ?>
-										<option value="<?php echo esc_attr( $s ); ?>"><?php echo esc_html( ucfirst( $s ) ); ?></option>
-									<?php endforeach; ?>
-								</select>
-							</td>
-						</tr>
-						<tr>
-							<th><label for="wo-p-url">Job URL</label></th>
-							<td><input type="url" id="wo-p-url" class="large-text" placeholder="https://"></td>
-						</tr>
-					</table>
-				</div>
+				<textarea id="wo-raw-text" rows="6" class="large-text" style="font-size:13px" placeholder="Paste the full job listing, Upwork brief, LinkedIn DM, or email. Claude extracts title, company, budget, source, and writes a context summary automatically."></textarea>
+				<p>
+					<button id="wo-extract-btn" class="button button-primary">Extract with Claude →</button>
+					<span id="wo-extract-status" style="margin-left:10px;font-size:13px;color:#646970"></span>
+				</p>
+			</div>
+		</div>
+
+		<!-- STEP 2: Job Details -->
+		<div class="postbox" id="wo-form-box">
+			<div class="postbox-header"><h2 class="hndle">Step 2 — Job Details</h2></div>
+			<div class="inside">
 				<table class="form-table" style="margin:0">
 					<tr>
-						<th style="width:80px"><label for="wo-p-notes">Notes</label></th>
-						<td><textarea id="wo-p-notes" rows="2" class="large-text" placeholder="Key context, what they need, red flags…"></textarea></td>
+						<th style="width:90px"><label for="wo-p-title">Title</label></th>
+						<td><input type="text" id="wo-p-title" class="large-text" placeholder="WooCommerce subscription plugin rebuild"></td>
+					</tr>
+					<tr>
+						<th><label for="wo-p-company">Company</label></th>
+						<td>
+							<div style="display:flex;gap:8px;align-items:center">
+								<input type="text" id="wo-p-company" class="regular-text" placeholder="Company or client" style="flex:1">
+								<button type="button" id="wo-research-btn" class="button button-primary" style="white-space:nowrap;flex-shrink:0">Research with Gemini →</button>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="wo-p-budget">Budget</label></th>
+						<td><input type="text" id="wo-p-budget" class="regular-text" placeholder="€1 500 or €38/hr"></td>
+					</tr>
+					<tr>
+						<th><label for="wo-p-source">Source</label></th>
+						<td>
+							<select id="wo-p-source">
+								<?php foreach ( $sources as $s ) : ?>
+									<option value="<?php echo esc_attr( $s ); ?>"><?php echo esc_html( ucfirst( $s ) ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="wo-p-status">Status</label></th>
+						<td>
+							<select id="wo-p-status">
+								<?php foreach ( $statuses as $s ) : ?>
+									<option value="<?php echo esc_attr( $s ); ?>"><?php echo esc_html( ucfirst( $s ) ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="wo-p-url">Job URL</label></th>
+						<td><input type="url" id="wo-p-url" class="large-text" placeholder="https://"></td>
+					</tr>
+					<tr>
+						<th><label for="wo-p-notes">Notes</label></th>
+						<td><textarea id="wo-p-notes" rows="4" class="large-text" placeholder="Requirements, tech stack, context, red flags…"></textarea></td>
 					</tr>
 				</table>
-				<p>
-					<button id="wo-add-proposal-btn" class="button button-primary">Save proposal</button>
-					<button id="wo-draft-btn" class="button" style="margin-left:8px">Draft with Claude →</button>
-					<span id="wo-proposal-status" style="margin-left:10px;font-size:13px"></span>
-				</p>
+			</div>
+		</div>
 
-				<div id="wo-draft-panel" style="display:none;margin-top:12px">
-					<div style="background:#f8f9fa;border:1px solid #c3c4c7;border-radius:4px;padding:16px">
-						<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-							<strong style="font-size:13px">Claude Draft</strong>
-							<button id="wo-draft-copy-btn" class="button button-small">Copy</button>
-						</div>
-						<div id="wo-draft-status" style="font-size:13px;color:#646970;margin-bottom:8px"></div>
-						<textarea id="wo-draft-output" rows="12" class="large-text" style="font-size:13px;line-height:1.65"></textarea>
-					</div>
+		<!-- STEP 3a: Research results (hidden until triggered) -->
+		<div id="wo-research-box" style="display:none" class="postbox">
+			<div class="postbox-header"><h2 class="hndle" id="wo-research-heading">Step 3 — Research</h2></div>
+			<div class="inside" style="padding:0">
+				<div id="wo-research-status" style="padding:12px 16px;font-size:13px;color:#646970;display:none"></div>
+				<div id="wo-research-output" class="wo-output" style="margin:0 16px 16px;max-height:420px"></div>
+				<div style="padding:0 16px 14px">
+					<button id="wo-analyse-btn" class="button button-primary button-large" style="display:none;width:100%">Analyse fit with Claude →</button>
 				</div>
 			</div>
 		</div>
 
+		<!-- STEP 3b: Fit Analysis (hidden until triggered) -->
+		<div id="wo-analysis-box" style="display:none" class="postbox">
+			<div class="postbox-header"><h2 class="hndle">Fit Analysis</h2></div>
+			<div class="inside" style="padding:0">
+				<div id="wo-analysis-status" style="padding:12px 16px;font-size:13px;color:#646970;display:none"></div>
+				<div id="wo-analysis-output" class="wo-output" style="margin:0 16px 16px;max-height:420px"></div>
+			</div>
+		</div>
+
+		<!-- STEP 4: Draft & Save -->
+		<div class="postbox" id="wo-draft-save-box">
+			<div class="postbox-header" style="display:flex;justify-content:space-between;align-items:center">
+				<h2 class="hndle">Step 4 — Draft &amp; Save</h2>
+				<div style="display:flex;gap:8px;align-items:center;margin:10px 12px 0 0">
+					<button id="wo-draft-btn" class="button button-primary">Draft with Claude →</button>
+					<button id="wo-add-proposal-btn" class="button">Save proposal</button>
+					<span id="wo-proposal-status" style="font-size:13px;line-height:28px"></span>
+				</div>
+			</div>
+			<div class="inside" style="padding:12px 16px 16px">
+				<div id="wo-draft-status" style="font-size:13px;color:#646970;margin-bottom:8px;display:none"></div>
+				<textarea id="wo-draft-output" rows="10" class="large-text" style="font-size:13px;line-height:1.65" placeholder="Your Claude-drafted proposal appears here. Edit it before saving or copying."></textarea>
+				<p style="margin:8px 0 0">
+					<button id="wo-draft-copy-btn" class="button button-small">Copy draft</button>
+					<button id="wo-reset-btn" class="button button-small" style="margin-left:8px;color:#646970">Clear form</button>
+				</p>
+			</div>
+		</div>
+
+		<!-- Proposals table -->
 		<table class="widefat striped" id="wo-proposals-table">
 			<thead>
 				<tr>
@@ -106,7 +149,7 @@ $status_colors = array(
 			</thead>
 			<tbody>
 				<?php if ( empty( $proposals ) ) : ?>
-					<tr><td colspan="7" style="color:#646970;padding:20px">No proposals yet. Log one above.</td></tr>
+					<tr><td colspan="7" style="color:#646970;padding:20px">No proposals yet. Paste a job above to get started.</td></tr>
 				<?php else : ?>
 					<?php foreach ( $proposals as $p ) :
 						$c = $status_colors[ $p['status'] ] ?? '#646970'; ?>
@@ -149,62 +192,276 @@ $status_colors = array(
 <script>
 (function() {
 	const cfg = window.workOsConfig;
+	let researchText  = '';
+	let analysisText  = '';
+	let currentLogId  = 0;
 
-	// Pre-fill from research page
+	// ── renderMarkdown ────────────────────────────────────────────────────
+	function renderMarkdown(text) {
+		if (!text) return '';
+		// Escape HTML entities first so we don't accidentally execute user content
+		// (API output is trusted, but we still escape < > & to be safe before adding our own tags)
+		const escaped = text
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;');
+
+		const lines   = escaped.split('\n');
+		const output  = [];
+		let inList     = false;
+
+		for (let i = 0; i < lines.length; i++) {
+			let line = lines[i];
+
+			// Headings
+			if (/^### /.test(line)) {
+				if (inList) { output.push('</ul>'); inList = false; }
+				output.push('<h4 style="margin:12px 0 4px;font-size:13px">' + line.slice(4) + '</h4>');
+				continue;
+			}
+			if (/^## /.test(line)) {
+				if (inList) { output.push('</ul>'); inList = false; }
+				output.push('<h3 style="margin:14px 0 4px;font-size:14px">' + line.slice(3) + '</h3>');
+				continue;
+			}
+			if (/^# /.test(line)) {
+				if (inList) { output.push('</ul>'); inList = false; }
+				output.push('<h2 style="margin:16px 0 6px;font-size:15px">' + line.slice(2) + '</h2>');
+				continue;
+			}
+
+			// List items (- or *)
+			if (/^[-*] /.test(line)) {
+				if (!inList) { output.push('<ul style="margin:4px 0 4px 18px;padding:0">'); inList = true; }
+				output.push('<li>' + applyInline(line.slice(2)) + '</li>');
+				continue;
+			}
+
+			// Numbered list items
+			if (/^\d+\. /.test(line)) {
+				if (inList) { output.push('</ul>'); inList = false; }
+				// Just treat as paragraph with bold number
+				output.push('<p style="margin:4px 0">' + applyInline(line) + '</p>');
+				continue;
+			}
+
+			// Empty line — close list and add spacing
+			if (line.trim() === '') {
+				if (inList) { output.push('</ul>'); inList = false; }
+				output.push('<div style="height:6px"></div>');
+				continue;
+			}
+
+			// Normal paragraph line
+			if (inList) { output.push('</ul>'); inList = false; }
+			output.push('<p style="margin:4px 0">' + applyInline(line) + '</p>');
+		}
+
+		if (inList) output.push('</ul>');
+		return output.join('');
+	}
+
+	function applyInline(text) {
+		// Bold: **text**
+		text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+		// Italic: *text* (single, not double)
+		text = text.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+		// Inline code: `code`
+		text = text.replace(/`([^`]+)`/g, '<code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;font-size:12px">$1</code>');
+		return text;
+	}
+
+	// ── Pre-fill from research page ───────────────────────────────────────
 	try {
 		const prefill = sessionStorage.getItem('wo_prefill_proposal');
-		if ( prefill ) {
+		if (prefill) {
 			const d = JSON.parse(prefill);
 			if (d.company) document.getElementById('wo-p-company').value = d.company;
-			if (d.notes)   document.getElementById('wo-p-notes').value   = String(d.notes).substring(0, 600);
+			if (d.notes)   document.getElementById('wo-p-notes').value   = String(d.notes).substring(0, 800);
 			sessionStorage.removeItem('wo_prefill_proposal');
+			document.getElementById('wo-paste-box').style.display = 'none';
 		}
 	} catch(e) {}
 
-	document.getElementById('wo-add-proposal-btn').addEventListener('click', async function() {
-		const payload = getFormData();
-		if ( ! payload.title ) { document.getElementById('wo-proposal-status').textContent = 'Title is required.'; return; }
+	// ── Extract ───────────────────────────────────────────────────────────
+	document.getElementById('wo-extract-btn').addEventListener('click', async function() {
+		const raw = document.getElementById('wo-raw-text').value.trim();
+		if (!raw) { setStatus('wo-extract-status', 'Paste something first.', '#cc1818'); return; }
+
 		this.disabled = true;
-		document.getElementById('wo-proposal-status').textContent = 'Saving…';
+		setStatus('wo-extract-status', 'Extracting with Claude…', '#646970');
+
 		try {
-			const res  = await fetch( cfg.apiUrl + '/proposals', {
+			const res  = await fetch(cfg.apiUrl + '/proposals/extract', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.nonce },
-				body: JSON.stringify(payload),
+				body: JSON.stringify({ raw_text: raw }),
 			});
 			const data = await res.json();
-			if ( ! res.ok ) throw new Error( data.message || 'Error' );
-			prependRow(data);
-			clearForm();
-			document.getElementById('wo-proposal-status').textContent = 'Saved.';
-			setTimeout(() => document.getElementById('wo-proposal-status').textContent = '', 2000);
-		} catch (e) {
-			document.getElementById('wo-proposal-status').textContent = 'Error: ' + e.message;
+			if (!res.ok) throw new Error(data.message || 'Error');
+
+			if (data.title)   document.getElementById('wo-p-title').value   = data.title;
+			if (data.company) document.getElementById('wo-p-company').value = data.company;
+			if (data.budget)  document.getElementById('wo-p-budget').value  = data.budget;
+			if (data.job_url) document.getElementById('wo-p-url').value     = data.job_url;
+
+			if (data.notes || data.red_flags) {
+				const notesVal = (data.notes || '') + (data.red_flags ? '\n\nRed flags: ' + data.red_flags : '');
+				document.getElementById('wo-p-notes').value = notesVal.trim();
+			}
+
+			if (data.source) {
+				const sel = document.getElementById('wo-p-source');
+				for (const opt of sel.options) {
+					if (opt.value === data.source) { sel.value = data.source; break; }
+				}
+			}
+
+			setStatus('wo-extract-status', '✓ Extracted — review and adjust below.', '#00a32a');
+			setTimeout(() => setStatus('wo-extract-status', '', ''), 5000);
+
+			document.getElementById('wo-raw-text').style.display   = 'none';
+			this.style.display = 'none';
+			document.getElementById('wo-paste-heading').textContent =
+				'✓ ' + (data.title ? data.title : 'Job extracted') + ' — details below';
+
+		} catch(e) {
+			setStatus('wo-extract-status', 'Error: ' + e.message, '#cc1818');
 		} finally {
 			this.disabled = false;
 		}
 	});
 
-	document.getElementById('wo-draft-btn').addEventListener('click', async function() {
-		const payload   = getFormData();
-		const panel     = document.getElementById('wo-draft-panel');
-		const statusEl  = document.getElementById('wo-draft-status');
-		const outputEl  = document.getElementById('wo-draft-output');
-		panel.style.display = 'block';
-		statusEl.textContent = 'Generating draft with Claude…';
-		outputEl.value = '';
+	document.getElementById('wo-manual-link').addEventListener('click', function(e) {
+		e.preventDefault();
+		document.getElementById('wo-paste-box').style.display = 'none';
+	});
+
+	// ── Research ──────────────────────────────────────────────────────────
+	document.getElementById('wo-research-btn').addEventListener('click', async function() {
+		const company = document.getElementById('wo-p-company').value.trim();
+		const jobDesc = document.getElementById('wo-p-notes').value.trim();
+		if (!company) { alert('Enter a company name first.'); return; }
+
+		const researchBox  = document.getElementById('wo-research-box');
+		const statusEl     = document.getElementById('wo-research-status');
+		const outputEl     = document.getElementById('wo-research-output');
+		const analyseBtn   = document.getElementById('wo-analyse-btn');
+		const analysisBox  = document.getElementById('wo-analysis-box');
+
+		researchBox.style.display  = 'block';
+		statusEl.style.display     = 'block';
+		statusEl.textContent       = 'Researching with Gemini…';
+		outputEl.innerHTML         = '';
+		analyseBtn.style.display   = 'none';
+		analysisBox.style.display  = 'none';
+		document.getElementById('wo-analysis-output').innerHTML  = '';
+		document.getElementById('wo-analysis-status').style.display = 'none';
+		document.getElementById('wo-research-heading').textContent  = 'Step 3 — Research: ' + company;
+		researchText  = '';
+		analysisText  = '';
+		currentLogId  = 0;
+
 		this.disabled = true;
+
 		try {
-			const res  = await fetch( cfg.apiUrl + '/proposals/draft', {
+			const res  = await fetch(cfg.apiUrl + '/research', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.nonce },
-				body: JSON.stringify(payload),
+				body: JSON.stringify({ company, job_description: jobDesc }),
 			});
 			const data = await res.json();
-			if ( ! res.ok ) throw new Error( data.message || 'Error' );
-			outputEl.value = data.draft || '';
-			statusEl.textContent = '';
-		} catch (e) {
+			if (!res.ok) throw new Error(data.message || 'Error');
+
+			researchText          = data.output || '';
+			currentLogId          = data.log_id || 0;
+			outputEl.innerHTML    = renderMarkdown(researchText);
+			statusEl.style.display = 'none';
+			analyseBtn.style.display = 'block';
+
+		} catch(e) {
+			statusEl.textContent = 'Error: ' + e.message;
+		} finally {
+			this.disabled = false;
+		}
+	});
+
+	// ── Fit Analysis ──────────────────────────────────────────────────────
+	document.getElementById('wo-analyse-btn').addEventListener('click', async function() {
+		if (!researchText) return;
+
+		const company     = document.getElementById('wo-p-company').value.trim();
+		const statusEl    = document.getElementById('wo-analysis-status');
+		const outputEl    = document.getElementById('wo-analysis-output');
+		const analysisBox = document.getElementById('wo-analysis-box');
+
+		analysisBox.style.display  = 'block';
+		statusEl.style.display     = 'block';
+		statusEl.textContent       = 'Analysing fit with Claude…';
+		outputEl.innerHTML         = '';
+		this.disabled              = true;
+
+		try {
+			const res  = await fetch(cfg.apiUrl + '/analyse', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.nonce },
+				body: JSON.stringify({ company, research: researchText, log_id: currentLogId }),
+			});
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.message || 'Error');
+
+			analysisText           = data.output || '';
+			outputEl.innerHTML     = renderMarkdown(analysisText);
+			statusEl.style.display = 'none';
+
+			// Scroll to Draft section and pulse the Draft button
+			const draftBox = document.getElementById('wo-draft-save-box');
+			if (draftBox) {
+				draftBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+			const draftBtn = document.getElementById('wo-draft-btn');
+			if (draftBtn) {
+				draftBtn.classList.add('wo-pulse');
+				setTimeout(() => draftBtn.classList.remove('wo-pulse'), 2000);
+			}
+
+		} catch(e) {
+			statusEl.textContent = 'Error: ' + e.message;
+		} finally {
+			this.disabled = false;
+		}
+	});
+
+	// ── Draft ─────────────────────────────────────────────────────────────
+	document.getElementById('wo-draft-btn').addEventListener('click', async function() {
+		const statusEl = document.getElementById('wo-draft-status');
+		const outputEl = document.getElementById('wo-draft-output');
+
+		statusEl.style.display = 'block';
+		statusEl.textContent   = 'Drafting with Claude…';
+		outputEl.value         = '';
+		this.disabled          = true;
+
+		try {
+			const res = await fetch(cfg.apiUrl + '/proposals/draft', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.nonce },
+				body: JSON.stringify({
+					title:            document.getElementById('wo-p-title').value.trim(),
+					company:          document.getElementById('wo-p-company').value.trim(),
+					budget:           document.getElementById('wo-p-budget').value.trim(),
+					notes:            document.getElementById('wo-p-notes').value.trim(),
+					research_context: researchText,
+					fit_analysis:     analysisText,
+				}),
+			});
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.message || 'Error');
+
+			outputEl.value         = data.draft || '';
+			statusEl.style.display = 'none';
+
+		} catch(e) {
 			statusEl.textContent = 'Error: ' + e.message;
 		} finally {
 			this.disabled = false;
@@ -213,30 +470,82 @@ $status_colors = array(
 
 	document.getElementById('wo-draft-copy-btn').addEventListener('click', function() {
 		const text = document.getElementById('wo-draft-output').value;
+		if (!text) return;
 		navigator.clipboard.writeText(text).then(() => {
 			this.textContent = 'Copied!';
-			setTimeout(() => this.textContent = 'Copy', 1500);
+			setTimeout(() => this.textContent = 'Copy draft', 1500);
 		});
 	});
 
-	function getFormData() {
-		return {
-			title:   document.getElementById('wo-p-title').value.trim(),
-			company: document.getElementById('wo-p-company').value.trim(),
-			budget:  document.getElementById('wo-p-budget').value.trim(),
-			source:  document.getElementById('wo-p-source').value,
-			status:  document.getElementById('wo-p-status').value,
-			job_url: document.getElementById('wo-p-url').value.trim(),
-			notes:   document.getElementById('wo-p-notes').value.trim(),
-		};
-	}
+	// ── Save ──────────────────────────────────────────────────────────────
+	document.getElementById('wo-add-proposal-btn').addEventListener('click', async function() {
+		const title = document.getElementById('wo-p-title').value.trim();
+		if (!title) { setStatus('wo-proposal-status', 'Title is required.', '#cc1818'); return; }
 
-	function clearForm() {
+		this.disabled = true;
+		setStatus('wo-proposal-status', 'Saving…', '#646970');
+
+		try {
+			const res = await fetch(cfg.apiUrl + '/proposals', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.nonce },
+				body: JSON.stringify({
+					title,
+					company:  document.getElementById('wo-p-company').value.trim(),
+					budget:   document.getElementById('wo-p-budget').value.trim(),
+					source:   document.getElementById('wo-p-source').value,
+					status:   document.getElementById('wo-p-status').value,
+					job_url:  document.getElementById('wo-p-url').value.trim(),
+					notes:    document.getElementById('wo-p-notes').value.trim(),
+					raw_text: document.getElementById('wo-raw-text').value.trim(),
+					research: researchText,
+					draft:    document.getElementById('wo-draft-output').value.trim(),
+					analysis: analysisText,
+				}),
+			});
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.message || 'Error');
+
+			prependRow(data);
+			resetForm();
+			setStatus('wo-proposal-status', '✓ Saved.', '#00a32a');
+			setTimeout(() => setStatus('wo-proposal-status', '', ''), 3000);
+
+		} catch(e) {
+			setStatus('wo-proposal-status', 'Error: ' + e.message, '#cc1818');
+		} finally {
+			this.disabled = false;
+		}
+	});
+
+	// ── Reset ─────────────────────────────────────────────────────────────
+	document.getElementById('wo-reset-btn').addEventListener('click', resetForm);
+
+	function resetForm() {
 		['wo-p-title','wo-p-company','wo-p-budget','wo-p-url','wo-p-notes'].forEach(id => {
 			document.getElementById(id).value = '';
 		});
+		document.getElementById('wo-draft-output').value      = '';
+		document.getElementById('wo-raw-text').value          = '';
+		document.getElementById('wo-raw-text').style.display  = '';
+		document.getElementById('wo-extract-btn').style.display = '';
+		document.getElementById('wo-paste-box').style.display   = '';
+		document.getElementById('wo-paste-heading').textContent = 'Step 1 — Paste job listing or message';
+		document.getElementById('wo-research-box').style.display    = 'none';
+		document.getElementById('wo-analysis-box').style.display    = 'none';
+		document.getElementById('wo-research-output').innerHTML      = '';
+		document.getElementById('wo-analysis-output').innerHTML      = '';
+		document.getElementById('wo-analyse-btn').style.display      = 'none';
+		document.getElementById('wo-research-status').style.display  = 'none';
+		document.getElementById('wo-analysis-status').style.display  = 'none';
+		document.getElementById('wo-draft-status').style.display     = 'none';
+		document.getElementById('wo-research-heading').textContent   = 'Step 3 — Research';
+		researchText = '';
+		analysisText = '';
+		currentLogId = 0;
 	}
 
+	// ── Table helpers ─────────────────────────────────────────────────────
 	const statusColors = { draft:'#646970', sent:'#2271b1', won:'#00a32a', lost:'#cc1818', declined:'#8c00d4' };
 
 	function prependRow(p) {
@@ -249,11 +558,15 @@ $status_colors = array(
 		tr.id = 'wo-proposal-' + p.id;
 		tr.innerHTML = `
 			<td style="white-space:nowrap;color:#646970;font-size:12px">${p.created_at.substring(0,10)}</td>
-			<td><strong style="font-size:13px">${esc(p.title)}</strong>${p.company?'<br><span style="font-size:12px;color:#646970">'+esc(p.company)+'</span>':''}</td>
+			<td>
+				<strong style="font-size:13px">${esc(p.title)}</strong>
+				${p.company ? '<br><span style="font-size:12px;color:#646970">' + esc(p.company) + '</span>' : ''}
+				${p.job_url ? '<br><a href="' + esc(p.job_url) + '" target="_blank" style="font-size:11px">↗ Job link</a>' : ''}
+			</td>
 			<td style="font-size:12px">${esc(p.budget||'')}</td>
 			<td style="font-size:12px;color:#646970">${esc(p.source||'')}</td>
 			<td><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;text-transform:uppercase;background:${c}22;color:${c}">${esc(p.status)}</span></td>
-			<td style="font-size:12px;color:#646970"></td>
+			<td style="font-size:12px;color:#646970;max-width:200px">${esc((p.notes||'').substring(0,80))}</td>
 			<td style="white-space:nowrap">
 				<select class="wo-status-select" data-id="${p.id}" style="font-size:12px">
 					${['draft','sent','won','lost','declined'].map(s=>`<option value="${s}"${s===p.status?' selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
@@ -266,13 +579,20 @@ $status_colors = array(
 	}
 
 	function esc(s) {
-		return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+		return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+	}
+
+	function setStatus(id, text, color) {
+		const el = document.getElementById(id);
+		if (!el) return;
+		el.textContent = text;
+		el.style.color  = color;
 	}
 
 	function attachRowEvents(tr) {
 		const sel = tr.querySelector('.wo-status-select');
 		if (sel) sel.addEventListener('change', async function() {
-			await fetch( cfg.apiUrl + '/proposals/' + this.dataset.id, {
+			await fetch(cfg.apiUrl + '/proposals/' + this.dataset.id, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.nonce },
 				body: JSON.stringify({ status: this.value }),
@@ -281,9 +601,9 @@ $status_colors = array(
 
 		const btn = tr.querySelector('.wo-delete-proposal-btn');
 		if (btn) btn.addEventListener('click', async function() {
-			if ( ! confirm('Delete this proposal?') ) return;
-			const id  = this.dataset.id;
-			await fetch( cfg.apiUrl + '/proposals/' + id, {
+			if (!confirm('Delete this proposal?')) return;
+			const id = this.dataset.id;
+			await fetch(cfg.apiUrl + '/proposals/' + id, {
 				method: 'DELETE',
 				headers: { 'X-WP-Nonce': cfg.nonce },
 			});

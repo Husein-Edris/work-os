@@ -22,11 +22,13 @@ $status_colors = array(
 );
 ?>
 <div class="wrap">
-	<h1>Work OS</h1>
-	<p style="color:#646970;margin-top:-8px;font-size:14px"><?php echo esc_html( date_i18n( 'l, j F Y' ) ); ?></p>
+	<h1 style="display:flex;align-items:baseline;gap:12px">
+		Work OS
+		<span style="font-size:13px;font-weight:400;color:#646970"><?php echo esc_html( date_i18n( 'l, j F Y' ) ); ?></span>
+	</h1>
 	<hr class="wp-header-end">
 
-	<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:960px;margin-top:20px">
+	<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:980px;margin-top:20px">
 
 		<!-- Active Proposals -->
 		<div class="postbox">
@@ -36,24 +38,27 @@ $status_colors = array(
 			</div>
 			<div class="inside" style="padding:0">
 				<?php if ( empty( $proposals ) ) : ?>
-					<p style="padding:16px;color:#646970;margin:0">No active proposals. <a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-proposals' ) ); ?>">Log one →</a></p>
+					<p style="padding:20px 16px;color:#646970;margin:0;font-size:13px">
+						No active proposals yet.
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-proposals' ) ); ?>" style="white-space:nowrap">Log one →</a>
+					</p>
 				<?php else : ?>
 					<table class="widefat" style="border:none;border-radius:0">
 						<tbody>
 						<?php foreach ( $proposals as $p ) :
 							$c = $status_colors[ $p['status'] ] ?? '#646970'; ?>
 							<tr>
-								<td style="padding:8px 12px">
-									<strong style="font-size:13px"><?php echo esc_html( $p['title'] ); ?></strong>
+								<td style="padding:9px 14px">
+									<strong style="font-size:13px;line-height:1.4"><?php echo esc_html( $p['title'] ); ?></strong>
 									<?php if ( $p['company'] ) : ?>
 										<br><span style="font-size:12px;color:#646970"><?php echo esc_html( $p['company'] ); ?></span>
 									<?php endif; ?>
 								</td>
-								<td style="padding:8px 12px;text-align:right;white-space:nowrap">
+								<td style="padding:9px 14px;text-align:right;white-space:nowrap;vertical-align:middle">
 									<?php if ( $p['budget'] ) : ?>
-										<span style="font-size:12px;color:#333;margin-right:8px"><?php echo esc_html( $p['budget'] ); ?></span>
+										<span style="font-size:12px;color:#50575e;margin-right:8px"><?php echo esc_html( $p['budget'] ); ?></span>
 									<?php endif; ?>
-									<span style="font-size:11px;font-weight:600;text-transform:uppercase;color:<?php echo esc_attr( $c ); ?>"><?php echo esc_html( $p['status'] ); ?></span>
+									<span class="wo-badge" style="background:<?php echo esc_attr( $c ); ?>18;color:<?php echo esc_attr( $c ); ?>"><?php echo esc_html( $p['status'] ); ?></span>
 								</td>
 							</tr>
 						<?php endforeach; ?>
@@ -71,17 +76,20 @@ $status_colors = array(
 			</div>
 			<div class="inside" style="padding:0">
 				<?php if ( empty( $memory ) ) : ?>
-					<p style="padding:16px;color:#646970;margin:0">No events yet. <a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-memory' ) ); ?>">Add one →</a></p>
+					<p style="padding:20px 16px;color:#646970;margin:0;font-size:13px">
+						No memory events yet.
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-memory' ) ); ?>" style="white-space:nowrap">Add one →</a>
+					</p>
 				<?php else : ?>
 					<table class="widefat" style="border:none;border-radius:0">
 						<tbody>
 						<?php foreach ( $memory as $ev ) : ?>
 							<tr>
-								<td style="padding:8px 12px">
-									<div style="font-size:12px;color:#1d2327"><?php echo esc_html( wp_trim_words( $ev['note'], 14 ) ); ?></div>
-									<div style="font-size:11px;color:#646970;margin-top:2px">
+								<td style="padding:9px 14px">
+									<div style="font-size:13px;color:#1d2327;line-height:1.5"><?php echo esc_html( wp_trim_words( $ev['note'], 14 ) ); ?></div>
+									<div style="font-size:11px;color:#8c8f94;margin-top:3px">
 										<?php echo esc_html( substr( $ev['created_at'], 0, 10 ) ); ?>
-										&bull; <?php echo esc_html( $ev['kind'] ); ?>
+										&nbsp;&middot;&nbsp;<?php echo esc_html( $ev['kind'] ); ?>
 									</div>
 								</td>
 							</tr>
@@ -94,8 +102,8 @@ $status_colors = array(
 
 		<!-- Quick actions -->
 		<div class="postbox" style="grid-column:1/-1">
-			<div class="postbox-header"><h2 class="hndle">Quick actions</h2></div>
-			<div class="inside" style="display:flex;gap:12px;flex-wrap:wrap;padding:16px">
+			<div class="postbox-header"><h2 class="hndle">Quick Actions</h2></div>
+			<div class="inside" style="padding:14px 16px 16px;display:flex;gap:10px;flex-wrap:wrap">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-research' ) ); ?>" class="button button-primary">Research a company</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-proposals' ) ); ?>" class="button">Log a proposal</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-memory' ) ); ?>" class="button">Add memory event</a>
@@ -107,13 +115,13 @@ $status_colors = array(
 		<!-- Job feed placeholder -->
 		<div class="postbox" style="grid-column:1/-1">
 			<div class="postbox-header"><h2 class="hndle">Job Feed</h2></div>
-			<div class="inside">
-				<div class="notice notice-info inline" style="margin:0">
-					<p>
-						<strong>Live job feed coming soon.</strong>
-						Connect Upwork credentials in <a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-settings' ) ); ?>">Settings</a> to enable automatic job fetching from Upwork and LinkedIn.
-					</p>
-				</div>
+			<div class="inside" style="padding:14px 16px 16px">
+				<p style="margin:0;font-size:13px;color:#646970">
+					<strong style="color:#1d2327">Live job feed coming soon.</strong>
+					&nbsp;Connect Upwork credentials in
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-settings' ) ); ?>">Settings</a>
+					to enable automatic job fetching from Upwork and LinkedIn.
+				</p>
 			</div>
 		</div>
 
