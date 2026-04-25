@@ -30,22 +30,6 @@ if ( isset( $_POST['work_os_settings_nonce'] ) && wp_verify_nonce( $_POST['work_
 		update_option( 'work_os_github_token', sanitize_text_field( $_POST['github_token'] ) );
 	}
 
-	// Upwork
-	if ( isset( $_POST['upwork_client_id'] ) ) {
-		update_option( 'work_os_upwork_client_id', sanitize_text_field( $_POST['upwork_client_id'] ) );
-	}
-	if ( isset( $_POST['upwork_client_secret'] ) && strpos( $_POST['upwork_client_secret'], '*' ) === false ) {
-		update_option( 'work_os_upwork_client_secret', sanitize_text_field( $_POST['upwork_client_secret'] ) );
-	}
-
-	// LinkedIn
-	if ( isset( $_POST['linkedin_client_id'] ) ) {
-		update_option( 'work_os_linkedin_client_id', sanitize_text_field( $_POST['linkedin_client_id'] ) );
-	}
-	if ( isset( $_POST['linkedin_client_secret'] ) && strpos( $_POST['linkedin_client_secret'], '*' ) === false ) {
-		update_option( 'work_os_linkedin_client_secret', sanitize_text_field( $_POST['linkedin_client_secret'] ) );
-	}
-
 	// Voice / rate constants
 	if ( isset( $_POST['voice_rate'] ) ) {
 		update_option( 'work_os_voice_rate', sanitize_text_field( $_POST['voice_rate'] ) );
@@ -92,10 +76,6 @@ $cv_address           = get_option( 'work_os_cv_address', '' );
 $cv_linkedin          = get_option( 'work_os_cv_linkedin', '' );
 $cv_github            = get_option( 'work_os_cv_github', '' );
 $github_token         = get_option( 'work_os_github_token', '' );
-$upwork_client_id     = get_option( 'work_os_upwork_client_id', '' );
-$upwork_client_secret = get_option( 'work_os_upwork_client_secret', '' );
-$linkedin_client_id     = get_option( 'work_os_linkedin_client_id', '' );
-$linkedin_client_secret = get_option( 'work_os_linkedin_client_secret', '' );
 $voice_rate           = get_option( 'work_os_voice_rate', '€38/hr' );
 $voice_niche          = get_option( 'work_os_voice_niche', 'WordPress / WooCommerce' );
 $voice_tagline        = get_option( 'work_os_voice_tagline', '' );
@@ -206,59 +186,6 @@ if ( ! function_exists( 'work_os_mask' ) ) {
 							<span style="color:#00a32a">&#10003; Key set</span> — enter a new value to replace.
 						<?php else : ?>
 							Get your key at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>.
-						<?php endif; ?>
-					</p>
-				</td>
-			</tr>
-		</table>
-
-		<h2 class="title">Job Sources</h2>
-		<table class="form-table" role="presentation">
-			<tr>
-				<th scope="row"><label for="upwork_client_id">Upwork Client ID</label></th>
-				<td>
-					<input type="text" id="upwork_client_id" name="upwork_client_id" class="regular-text"
-						value="<?php echo esc_attr( $upwork_client_id ); ?>">
-					<p class="description">From your Upwork developer app. Required for job feed.</p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="upwork_client_secret">Upwork Client Secret</label></th>
-				<td>
-					<input type="password" id="upwork_client_secret" name="upwork_client_secret" class="regular-text"
-						value="<?php echo esc_attr( work_os_mask( $upwork_client_secret ) ); ?>"
-						autocomplete="new-password">
-					<p class="description">
-						<?php if ( $upwork_client_secret ) : ?>
-							<span style="color:#00a32a">&#10003; Secret set</span>
-						<?php else : ?>
-							OAuth credentials for Upwork API access.
-						<?php endif; ?>
-					</p>
-				</td>
-			</tr>
-		</table>
-
-		<h2 class="title">LinkedIn API</h2>
-		<table class="form-table" role="presentation">
-			<tr>
-				<th scope="row"><label for="linkedin_client_id">LinkedIn Client ID</label></th>
-				<td>
-					<input type="text" id="linkedin_client_id" name="linkedin_client_id" class="regular-text"
-						value="<?php echo esc_attr( $linkedin_client_id ); ?>">
-				</td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="linkedin_client_secret">LinkedIn Client Secret</label></th>
-				<td>
-					<input type="password" id="linkedin_client_secret" name="linkedin_client_secret" class="regular-text"
-						value="<?php echo esc_attr( work_os_mask( $linkedin_client_secret ) ); ?>"
-						autocomplete="new-password">
-					<p class="description">
-						<?php if ( $linkedin_client_secret ) : ?>
-							<span style="color:#00a32a">&#10003; Secret set</span>
-						<?php else : ?>
-							OAuth credentials for LinkedIn API access.
 						<?php endif; ?>
 					</p>
 				</td>

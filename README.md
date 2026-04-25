@@ -22,7 +22,7 @@ A WordPress plugin for managing your freelance career from wp-admin. Research co
 
 **GitHub Sync** — Compares your public GitHub repos against your portfolio projects CPT. Repos with a substantial README that are missing from your portfolio get a "Generate draft" button — Claude reads the actual README and repo metadata, then creates a project CPT draft with all ACF fields populated (challenge, solution, tech stack, key features, GitHub URL). Drafts are flagged for review before publishing. Repos you want to skip permanently can be blocklisted.
 
-**Settings** — API keys (Claude, Gemini, GitHub). CV contact details (phone, address, LinkedIn, GitHub). Custom AI prompt rules for proposals and blog generation.
+**Settings** — API keys (Claude, Gemini) and GitHub token. CV contact details (phone, address, LinkedIn, GitHub). Custom AI prompt rules for proposals and blog generation.
 
 ---
 
@@ -34,7 +34,7 @@ A WordPress plugin for managing your freelance career from wp-admin. Research co
 - An About page with ACF experience and skills fields populated
 - Claude API key — for proposals, blog generation, fit analysis, and GitHub project generation
 - Gemini API key — for company research
-- GitHub personal access token — optional, but recommended (raises API rate limit from 60 to 5,000 requests/hour)
+- GitHub personal access token — optional, raises API rate limit from 60 to 5,000 requests/hour
 
 ---
 
