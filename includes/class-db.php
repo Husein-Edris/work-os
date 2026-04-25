@@ -70,6 +70,29 @@ class WorkOS_DB {
 			PRIMARY KEY (id)
 		) $charset;" );
 
+		dbDelta( "CREATE TABLE {$wpdb->prefix}work_os_portfolio_log (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+			analysis longtext DEFAULT '',
+			projects_count int(11) NOT NULL DEFAULT 0,
+			skills_count int(11) NOT NULL DEFAULT 0,
+			experience_count int(11) NOT NULL DEFAULT 0,
+			posts_count int(11) NOT NULL DEFAULT 0,
+			PRIMARY KEY (id)
+		) $charset;" );
+
+		dbDelta( "CREATE TABLE {$wpdb->prefix}work_os_suggestions (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+			entry_key varchar(100) NOT NULL DEFAULT '',
+			entry_label varchar(255) NOT NULL DEFAULT '',
+			field varchar(100) NOT NULL DEFAULT '',
+			current_value longtext DEFAULT '',
+			candidates longtext DEFAULT '',
+			rationale text DEFAULT '',
+			PRIMARY KEY (id)
+		) $charset;" );
+
 		update_option( 'work_os_db_version', WORK_OS_VERSION );
 	}
 }

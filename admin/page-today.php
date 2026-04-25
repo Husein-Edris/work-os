@@ -108,20 +108,9 @@ $status_colors = array(
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-proposals' ) ); ?>" class="button">Log a proposal</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-memory' ) ); ?>" class="button">Add memory event</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-blog' ) ); ?>" class="button">Generate blog post</a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-portfolio' ) ); ?>" class="button">Analyze portfolio</a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-github' ) ); ?>" class="button">GitHub Sync</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-cv' ) ); ?>" class="button">View CV</a>
-			</div>
-		</div>
-
-		<!-- Job feed placeholder -->
-		<div class="postbox" style="grid-column:1/-1">
-			<div class="postbox-header"><h2 class="hndle">Job Feed</h2></div>
-			<div class="inside" style="padding:14px 16px 16px">
-				<p style="margin:0;font-size:13px;color:#646970">
-					<strong style="color:#1d2327">Live job feed coming soon.</strong>
-					&nbsp;Connect Upwork credentials in
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=work-os-settings' ) ); ?>">Settings</a>
-					to enable automatic job fetching from Upwork and LinkedIn.
-				</p>
 			</div>
 		</div>
 

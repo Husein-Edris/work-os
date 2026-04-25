@@ -14,6 +14,7 @@ class WorkOS_Router {
 		require_once WORK_OS_PATH . 'includes/api/class-proposals.php';
 		require_once WORK_OS_PATH . 'includes/api/class-blog.php';
 		require_once WORK_OS_PATH . 'includes/api/class-documents.php';
+		require_once WORK_OS_PATH . 'includes/api/class-portfolio-analyzer.php';
 		require_once WORK_OS_PATH . 'includes/api/class-github-sync.php';
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
@@ -128,6 +129,51 @@ class WorkOS_Router {
 			'methods'             => 'POST',
 			'callback'            => array( 'WorkOS_Blog', 'publish' ),
 			'permission_callback' => $auth,
+		) );
+
+		// Portfolio Analyzer
+		register_rest_route( 'work-os/v1', '/portfolio/analyze', array(
+			'methods'             => 'POST',
+			'callback'            => array( 'WorkOS_Portfolio_Analyzer', 'analyse' ),
+			'permission_callback' => $auth,
+		) );
+
+		register_rest_route( 'work-os/v1', '/portfolio/log', array(
+			'methods'             => 'GET',
+			'callback'            => array( 'WorkOS_Portfolio_Analyzer', 'list_logs' ),
+			'permission_callback' => $auth,
+		) );
+
+		register_rest_route( 'work-os/v1', '/portfolio/log/(?P<id>\d+)', array(
+			array( 'methods' => 'GET',    'callback' => array( 'WorkOS_Portfolio_Analyzer', 'get_log' ),    'permission_callback' => $auth ),
+			array( 'methods' => 'DELETE', 'callback' => array( 'WorkOS_Portfolio_Analyzer', 'delete_log' ), 'permission_callback' => $auth ),
+		) );
+
+		register_rest_route( 'work-os/v1', '/portfolio/entries', array(
+			'methods'             => 'GET',
+			'callback'            => array( 'WorkOS_Portfolio_Analyzer', 'list_entries' ),
+			'permission_callback' => $auth,
+		) );
+
+		register_rest_route( 'work-os/v1', '/portfolio/suggest', array(
+			'methods'             => 'POST',
+			'callback'            => array( 'WorkOS_Portfolio_Analyzer', 'suggest_fixes' ),
+			'permission_callback' => $auth,
+		) );
+
+		register_rest_route( 'work-os/v1', '/portfolio/suggestions', array(
+			'methods'             => 'GET',
+			'callback'            => array( 'WorkOS_Portfolio_Analyzer', 'list_suggestions' ),
+			'permission_callback' => $auth,
+		) );
+
+		register_rest_route( 'work-os/v1', '/portfolio/suggestions/(?P<id>\d+)', array(
+			'methods'             => 'DELETE',
+			'callback'            => array( 'WorkOS_Portfolio_Analyzer', 'delete_suggestion' ),
+			'permission_callback' => $auth,
+			'args'                => array(
+				'id' => array( 'validate_callback' => fn( $v ) => is_numeric( $v ) ),
+			),
 		) );
 
 		// GitHub Sync

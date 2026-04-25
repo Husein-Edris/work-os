@@ -37,7 +37,8 @@ class WorkOS_Admin {
 		add_submenu_page( 'work-os', 'Memory — Work OS',    'Memory',    'manage_options', 'work-os-memory',    array( $this, 'page_memory' ) );
 		add_submenu_page( 'work-os', 'Blog — Work OS',      'Blog',      'manage_options', 'work-os-blog',      array( $this, 'page_blog' ) );
 		add_submenu_page( 'work-os', 'Settings — Work OS',  'Settings',  'manage_options', 'work-os-settings',  array( $this, 'page_settings' ) );
-		add_submenu_page( 'work-os', 'GitHub Sync — Work OS', 'GitHub Sync', 'manage_options', 'work-os-github', array( $this, 'page_github' ) );
+		add_submenu_page( 'work-os', 'Portfolio — Work OS',   'Portfolio',   'manage_options', 'work-os-portfolio', array( $this, 'page_portfolio' ) );
+		add_submenu_page( 'work-os', 'GitHub Sync — Work OS', 'GitHub Sync', 'manage_options', 'work-os-github',    array( $this, 'page_github' ) );
 	}
 
 	public function enqueue_assets( $hook ) {
@@ -50,6 +51,7 @@ class WorkOS_Admin {
 			'work-os_page_work-os-memory',
 			'work-os_page_work-os-blog',
 			'work-os_page_work-os-settings',
+			'work-os_page_work-os-portfolio',
 			'work-os_page_work-os-github',
 		);
 
@@ -189,6 +191,10 @@ class WorkOS_Admin {
 
 	public function page_settings() {
 		require_once WORK_OS_PATH . 'admin/page-settings.php';
+	}
+
+	public function page_portfolio() {
+		require_once WORK_OS_PATH . 'admin/page-portfolio.php';
 	}
 
 	public function page_github() {
