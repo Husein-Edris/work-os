@@ -17,6 +17,7 @@ class WorkOS_DB {
 			kind varchar(50) NOT NULL DEFAULT 'work',
 			note text NOT NULL,
 			tags varchar(255) DEFAULT '',
+			archived tinyint(1) NOT NULL DEFAULT 0,
 			PRIMARY KEY (id)
 		) $charset;" );
 

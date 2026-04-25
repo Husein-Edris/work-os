@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 global $wpdb;
 $table  = $wpdb->prefix . 'work_os_memory';
-$events = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY created_at DESC LIMIT 100", ARRAY_A ) ?: array();
+$events = $wpdb->get_results( "SELECT * FROM {$table} WHERE archived = 0 ORDER BY created_at DESC LIMIT 100", ARRAY_A ) ?: array();
 
 $kinds = array( 'work', 'learning', 'milestone', 'personal', 'client' );
 
@@ -189,7 +189,10 @@ $voice_niche = get_option( 'work_os_voice_niche', 'WordPress / WooCommerce' );
 								<span style="font-size:11px;color:#8c8f94">&middot; <?php echo esc_html( $ev['tags'] ); ?></span>
 							<?php endif; ?>
 						</div>
-						<button class="button button-small wo-delete-btn" data-id="<?php echo (int) $ev['id']; ?>" style="color:#cc1818;border-color:#cc181833">×</button>
+						<div style="display:flex;gap:6px">
+							<button class="button button-small wo-archive-btn" data-id="<?php echo (int) $ev['id']; ?>" style="color:#646970" title="Archive this event">Archive</button>
+							<button class="button button-small wo-delete-btn" data-id="<?php echo (int) $ev['id']; ?>" style="color:#cc1818;border-color:#cc181833" title="Delete permanently">×</button>
+						</div>
 					</div>
 					<div style="padding:13px 16px;font-size:13px;color:#1d2327;line-height:1.7;white-space:pre-wrap"><?php echo esc_html( $ev['note'] ); ?></div>
 				</div>
@@ -245,7 +248,10 @@ $voice_niche = get_option( 'work_os_voice_niche', 'WordPress / WooCommerce' );
 						<span style="font-size:12px;color:#8c8f94">${dateStr}</span>
 						${data.tags ? `<span style="font-size:11px;color:#8c8f94">· ${esc(data.tags)}</span>` : ''}
 					</div>
-					<button class="button button-small wo-delete-btn" data-id="${data.id}" style="color:#cc1818;border-color:#cc181833">×</button>
+					<div style="display:flex;gap:6px">
+						<button class="button button-small wo-archive-btn" data-id="${data.id}" style="color:#646970" title="Archive this event">Archive</button>
+						<button class="button button-small wo-delete-btn" data-id="${data.id}" style="color:#cc1818;border-color:#cc181833" title="Delete permanently">×</button>
+					</div>
 				</div>
 				<div style="padding:13px 16px;font-size:13px;color:#1d2327;line-height:1.7;white-space:pre-wrap">${esc(data.note)}</div>
 			`;
@@ -264,6 +270,7 @@ $voice_niche = get_option( 'work_os_voice_niche', 'WordPress / WooCommerce' );
 			status.textContent = '✓ Saved.';
 			setTimeout( () => status.textContent = '', 2500 );
 			attachDelete( card.querySelector('.wo-delete-btn') );
+			attachArchive( card.querySelector('.wo-archive-btn') );
 		} catch (e) {
 			status.style.color = '#cc1818';
 			status.textContent = e.message;
@@ -271,6 +278,28 @@ $voice_niche = get_option( 'work_os_voice_niche', 'WordPress / WooCommerce' );
 			addBtn.disabled = false;
 		}
 	});
+
+	function attachArchive(btn) {
+		btn.addEventListener('click', async function() {
+			const id   = this.dataset.id;
+			const card = document.getElementById('wo-event-' + id);
+			try {
+				const res = await fetch( cfg.apiUrl + '/memory/' + id + '/archive', {
+					method: 'POST',
+					headers: { 'X-WP-Nonce': cfg.nonce },
+				});
+				if ( ! res.ok ) throw new Error('Archive failed');
+				if ( card ) card.remove();
+				const remaining = feed.querySelectorAll('[id^="wo-event-"]');
+				if ( remaining.length === 0 ) {
+					const empty = document.createElement('div');
+					empty.style.cssText = 'padding:40px 20px;text-align:center;color:#646970;font-size:13px;background:#f8f9fa;border:1px solid #dcdcde;border-radius:4px';
+					empty.textContent = 'No memory events yet. Use the form on the left to log what you learn, ship, or achieve.';
+					feed.appendChild(empty);
+				}
+			} catch(e) { alert('Could not archive event.'); }
+		});
+	}
 
 	function attachDelete(btn) {
 		btn.addEventListener('click', async function() {
@@ -300,5 +329,6 @@ $voice_niche = get_option( 'work_os_voice_niche', 'WordPress / WooCommerce' );
 	}
 
 	document.querySelectorAll('.wo-delete-btn').forEach(attachDelete);
+	document.querySelectorAll('.wo-archive-btn').forEach(attachArchive);
 })();
 </script>

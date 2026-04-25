@@ -30,7 +30,16 @@ class WorkOS_Proposals {
 			return new WP_Error( 'missing_param', 'raw_text is required.', array( 'status' => 400 ) );
 		}
 
-		$prompt = "Extract key details from this job posting or message. Return ONLY valid JSON, no other text, no markdown code fences.\n\nText:\n" . $raw_text . "\n\nReturn exactly this JSON structure:\n{\"title\":\"job title\",\"company\":\"company or client name\",\"budget\":\"budget or rate if mentioned, empty string if not\",\"source\":\"upwork|linkedin|direct|other\",\"job_url\":\"URL if present in text, empty string otherwise\",\"language\":\"de|en\",\"notes\":\"2-3 sentence summary: what they need, key requirements, tech stack mentioned\",\"red_flags\":\"any concerns about scope, budget, or client, empty string if none\"}";
+		$prompt  = "Extract structured fields from this job posting. Return ONLY valid JSON, no markdown, no code fences, no commentary.\n\n";
+		$prompt .= "Rules:\n";
+		$prompt .= "- Use empty string for any field you cannot extract with confidence. Do not guess.\n";
+		$prompt .= "- 'language' must be exactly 'de' or 'en' based on the actual post text, not assumed from the company name.\n";
+		$prompt .= "- 'red_flags' should flag concrete concerns: vague scope, unrealistic budget, NDA before brief, no budget at all, demands for free test work, '24/7 availability' requirements, 'rockstar/ninja' language. Empty string if none.\n";
+		$prompt .= "- 'notes' must summarise what they actually need and the mandatory tech, in 2-3 sentences. No hype words.\n";
+		$prompt .= "- 'mandatory_tech' is a comma-separated list of technologies the post explicitly requires (not just 'would be nice').\n\n";
+		$prompt .= "Text to extract from:\n" . $raw_text . "\n\n";
+		$prompt .= "Return exactly this JSON structure:\n";
+		$prompt .= "{\"title\":\"\",\"company\":\"\",\"contact_person\":\"\",\"budget\":\"\",\"source\":\"upwork|linkedin|direct|other\",\"job_url\":\"\",\"language\":\"de|en\",\"location\":\"\",\"remote\":\"yes|no|hybrid|unknown\",\"mandatory_tech\":\"\",\"notes\":\"\",\"red_flags\":\"\"}";
 
 		$response = wp_remote_post(
 			'https://api.anthropic.com/v1/messages',
@@ -220,15 +229,18 @@ class WorkOS_Proposals {
 			}
 		}
 
-		$prompt  = "Write a concise freelance proposal for the following opportunity.\n\n";
+		$draft_rules = WorkOS_Settings::get_draft_prompt_rules();
+
+		$prompt  = "You are drafting a freelance proposal for me. Strict rules apply.\n\n";
+		$prompt .= $draft_rules . "\n\n";
+		$prompt .= "JOB DETAILS:\n";
 		$prompt .= "Title: {$title}\n";
-		if ( $company ) $prompt .= "Company/Client: {$company}\n";
-		if ( $budget )  $prompt .= "Budget: {$budget}\n";
-		if ( $notes )   $prompt .= "Context: {$notes}\n";
+		if ( $company )          $prompt .= "Client: {$company}\n";
+		if ( $budget )           $prompt .= "Budget: {$budget}\n";
+		if ( $notes )            $prompt .= "Context: {$notes}\n";
 		if ( $research_context ) $prompt .= "\nCompany research:\n{$research_context}\n";
 		if ( $fit_analysis )     $prompt .= "\nFit analysis:\n{$fit_analysis}\n";
-		$prompt .= "\nCandidate:\n{$profile_ctx}\n\n";
-		$prompt .= "Rules:\n- No AI filler (no 'I am thrilled', 'hope this finds you well', 'I came across')\n- Direct and specific\n- Reference at least one concrete past project or client result\n- Under 200 words\n- If it looks like a German-speaking client, write in formal German (Sie)\n- Use the company research to show you understand their business\n- End with a clear, low-friction next step";
+		$prompt .= "\nCANDIDATE PROFILE (only use facts listed here):\n{$profile_ctx}";
 
 		$response = wp_remote_post(
 			'https://api.anthropic.com/v1/messages',

@@ -70,62 +70,32 @@ class WorkOS_Profile {
 		) );
 		$tech_skills = array_map( fn( $p ) => $p->post_title, $tech_skill_posts );
 
-		// Education from ACF education_items repeater — falls back to hardcoded if not yet filled
-		$education = array();
-		if ( $about_page ) {
-			$edu_items = get_field( 'education_items', $about_page->ID );
-			if ( is_array( $edu_items ) && ! empty( $edu_items ) ) {
-				foreach ( $edu_items as $e ) {
-					$education[] = array(
-						'degree'      => $e['degree']      ?? '',
-						'institution' => $e['institution'] ?? '',
-						'period'      => $e['period']      ?? '',
-					);
-				}
-			}
-		}
-		if ( empty( $education ) ) {
-			$education = array(
-				array(
-					'degree'      => 'Diploma in Full Stack Web Development',
-					'institution' => 'Instant Software Solution',
-					'period'      => 'Oct 2021 – Aug 2022',
-				),
-				array(
-					'degree'      => 'Ausbildung Medienfachmann (Apprenticeship)',
-					'institution' => 'bobdo.com GmbH · Landesberufsschule Bregenz 2',
-					'period'      => '2019 – 2021',
-				),
-			);
-		}
+		// Static education — update via Settings once ACF fields are added
+		$education = array(
+			array(
+				'degree'      => 'Diploma in Full Stack Web Development',
+				'institution' => 'Instant Software Solution',
+				'period'      => 'Oct 2021 – Aug 2022',
+			),
+			array(
+				'degree'      => 'Ausbildung Medienfachmann (Apprenticeship)',
+				'institution' => 'bobdo.com GmbH · Landesberufsschule Bregenz 2',
+				'period'      => '2019 – 2021',
+			),
+		);
 
-		// Languages from ACF language_items repeater — falls back to hardcoded if not yet filled
-		$languages = array();
-		if ( $about_page ) {
-			$lang_items = get_field( 'language_items', $about_page->ID );
-			if ( is_array( $lang_items ) && ! empty( $lang_items ) ) {
-				foreach ( $lang_items as $l ) {
-					$languages[] = array(
-						'language' => $l['language'] ?? '',
-						'level'    => $l['level']    ?? '',
-					);
-				}
-			}
-		}
-		if ( empty( $languages ) ) {
-			$languages = array(
-				array( 'language' => 'Kurdish', 'level' => 'Native' ),
-				array( 'language' => 'German',  'level' => 'C1 – Fluent' ),
-				array( 'language' => 'English', 'level' => 'C1 – Fluent' ),
-			);
-		}
+		$languages = array(
+			array( 'language' => 'Kurdish', 'level' => 'Native' ),
+			array( 'language' => 'German',  'level' => 'C1 – Fluent' ),
+			array( 'language' => 'English', 'level' => 'C1 – Fluent' ),
+		);
 
 		$projects = self::get_projects();
 
 		return rest_ensure_response( array(
 			'name'        => get_bloginfo( 'name' ) ?: 'Edris Husein',
 			'headline'    => $headline,
-			'location'    => ( $about_page ? ( get_field( 'about_location', $about_page->ID ) ?: 'Dornbirn, Österreich' ) : 'Dornbirn, Österreich' ),
+			'location'    => 'Dornbirn, Österreich',
 			'email'       => get_option( 'admin_email' ),
 			'summary'     => $summary,
 			'experience'  => $experience,

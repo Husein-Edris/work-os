@@ -180,7 +180,8 @@ class WorkOS_Research {
 		$prompt .= "2. **Skill match** — what genuinely aligns (cite specific evidence from their profile/GitHub), what's missing\n";
 		$prompt .= "3. **Top 5 interview questions** they will likely ask\n";
 		$prompt .= "4. **Recommended opener** for the proposal or cover letter\n";
-		$prompt .= "5. **Red flags** (if any)\n\n";
+		$prompt .= "5. **Red flags** (if any)\n";
+		$prompt .= "6. **Apply or decline** — one clear recommendation with one sentence of reasoning\n\n";
 		$prompt .= "Be direct. No filler. If the candidate has relevant skills beyond their main niche, say so explicitly.";
 
 		$response = wp_remote_post(
@@ -314,6 +315,8 @@ class WorkOS_Research {
 		$rows = $wpdb->get_results(
 			"SELECT kind, note FROM {$wpdb->prefix}work_os_memory
 			 WHERE kind IN ('work','learning','milestone','client')
+			   AND archived = 0
+			   AND created_at >= DATE_SUB(NOW(), INTERVAL 60 DAY)
 			 ORDER BY created_at DESC LIMIT 10",
 			ARRAY_A
 		);

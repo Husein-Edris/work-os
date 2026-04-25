@@ -54,6 +54,30 @@ if ( isset( $_POST['work_os_settings_nonce'] ) && wp_verify_nonce( $_POST['work_
 		update_option( 'work_os_voice_tagline', sanitize_text_field( $_POST['voice_tagline'] ) );
 	}
 
+	// Prompt overrides
+	if ( isset( $_POST['prompt_draft_rules'] ) ) {
+		$val = sanitize_textarea_field( $_POST['prompt_draft_rules'] );
+		if ( trim( $val ) === trim( WorkOS_Settings::default_draft_prompt_rules() ) || $val === '' ) {
+			delete_option( 'work_os_prompt_draft_rules' );
+		} else {
+			update_option( 'work_os_prompt_draft_rules', $val );
+		}
+	}
+	if ( isset( $_POST['prompt_blog_rules'] ) ) {
+		$val = sanitize_textarea_field( $_POST['prompt_blog_rules'] );
+		if ( trim( $val ) === trim( WorkOS_Settings::default_blog_prompt_rules() ) || $val === '' ) {
+			delete_option( 'work_os_prompt_blog_rules' );
+		} else {
+			update_option( 'work_os_prompt_blog_rules', $val );
+		}
+	}
+	if ( isset( $_POST['reset_draft_rules'] ) ) {
+		delete_option( 'work_os_prompt_draft_rules' );
+	}
+	if ( isset( $_POST['reset_blog_rules'] ) ) {
+		delete_option( 'work_os_prompt_blog_rules' );
+	}
+
 	echo '<div class="notice notice-success is-dismissible"><p>Settings saved.</p></div>';
 }
 
@@ -71,6 +95,10 @@ $linkedin_client_secret = get_option( 'work_os_linkedin_client_secret', '' );
 $voice_rate           = get_option( 'work_os_voice_rate', '€38/hr' );
 $voice_niche          = get_option( 'work_os_voice_niche', 'WordPress / WooCommerce' );
 $voice_tagline        = get_option( 'work_os_voice_tagline', '' );
+$prompt_draft_custom  = get_option( 'work_os_prompt_draft_rules', '' );
+$prompt_blog_custom   = get_option( 'work_os_prompt_blog_rules', '' );
+$prompt_draft_active  = WorkOS_Settings::get_draft_prompt_rules();
+$prompt_blog_active   = WorkOS_Settings::get_blog_prompt_rules();
 
 if ( ! function_exists( 'work_os_mask' ) ) {
 	function work_os_mask( $key ) {
@@ -246,6 +274,57 @@ if ( ! function_exists( 'work_os_mask' ) ) {
 						value="<?php echo esc_attr( $voice_tagline ); ?>"
 						placeholder="WordPress developer focused on WooCommerce and headless builds">
 					<p class="description">One-liner that captures your positioning. Injected into proposal drafts.</p>
+				</td>
+			</tr>
+		</table>
+
+		<h2 class="title">AI Prompts</h2>
+		<p class="description" style="margin-bottom:16px">
+			The instruction blocks sent to Claude before the dynamic job/profile context.
+			Edit to customise tone, word limits, or rules. Leave blank or click Reset to restore the default.
+			<?php if ( $prompt_draft_custom || $prompt_blog_custom ) : ?>
+				<strong style="color:#2271b1"> — custom prompt active</strong>
+			<?php endif; ?>
+		</p>
+
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row" style="vertical-align:top;padding-top:12px">
+					<label for="prompt_draft_rules">Proposal Draft Rules</label>
+					<?php if ( $prompt_draft_custom ) : ?>
+						<br><span style="font-size:11px;color:#2271b1;font-weight:600">CUSTOM</span>
+					<?php else : ?>
+						<br><span style="font-size:11px;color:#8c8f94">default</span>
+					<?php endif; ?>
+				</th>
+				<td>
+					<textarea id="prompt_draft_rules" name="prompt_draft_rules" rows="18"
+						style="width:100%;max-width:700px;font-family:monospace;font-size:12px;line-height:1.6;box-sizing:border-box"
+					><?php echo esc_textarea( $prompt_draft_active ); ?></textarea>
+					<p class="description" style="margin-top:6px">
+						Injected after "You are drafting a freelance proposal for me." — before job details and candidate profile.
+						<button type="submit" name="reset_draft_rules" value="1" class="button button-small" style="margin-left:8px">Reset to default</button>
+					</p>
+				</td>
+			</tr>
+
+			<tr>
+				<th scope="row" style="vertical-align:top;padding-top:12px">
+					<label for="prompt_blog_rules">Blog Generation Rules</label>
+					<?php if ( $prompt_blog_custom ) : ?>
+						<br><span style="font-size:11px;color:#2271b1;font-weight:600">CUSTOM</span>
+					<?php else : ?>
+						<br><span style="font-size:11px;color:#8c8f94">default</span>
+					<?php endif; ?>
+				</th>
+				<td>
+					<textarea id="prompt_blog_rules" name="prompt_blog_rules" rows="18"
+						style="width:100%;max-width:700px;font-family:monospace;font-size:12px;line-height:1.6;box-sizing:border-box"
+					><?php echo esc_textarea( $prompt_blog_active ); ?></textarea>
+					<p class="description" style="margin-top:6px">
+						Injected after the format label — before topic, author profile, and memory context.
+						<button type="submit" name="reset_blog_rules" value="1" class="button button-small" style="margin-left:8px">Reset to default</button>
+					</p>
 				</td>
 			</tr>
 		</table>

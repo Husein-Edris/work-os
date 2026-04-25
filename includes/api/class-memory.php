@@ -12,7 +12,7 @@ class WorkOS_Memory {
 		global $wpdb;
 		$table = $wpdb->prefix . 'work_os_memory';
 		$rows  = $wpdb->get_results(
-			"SELECT * FROM {$table} ORDER BY created_at DESC LIMIT 100",
+			"SELECT * FROM {$table} WHERE archived = 0 ORDER BY created_at DESC LIMIT 100",
 			ARRAY_A
 		);
 		return rest_ensure_response( $rows ?: array() );
@@ -55,6 +55,22 @@ class WorkOS_Memory {
 			'tags'       => $tags,
 			'created_at' => current_time( 'mysql' ),
 		) );
+	}
+
+	public static function archive_event( WP_REST_Request $request ) {
+		global $wpdb;
+
+		$id    = (int) $request->get_param( 'id' );
+		$table = $wpdb->prefix . 'work_os_memory';
+
+		$exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d", $id ) );
+		if ( ! $exists ) {
+			return new WP_Error( 'not_found', 'Event not found', array( 'status' => 404 ) );
+		}
+
+		$wpdb->update( $table, array( 'archived' => 1 ), array( 'id' => $id ), array( '%d' ), array( '%d' ) );
+
+		return rest_ensure_response( array( 'ok' => true ) );
 	}
 
 	public static function delete_event( WP_REST_Request $request ) {

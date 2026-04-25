@@ -40,6 +40,15 @@ class WorkOS_Router {
 			array( 'methods' => 'POST', 'callback' => array( 'WorkOS_Memory', 'create_event' ), 'permission_callback' => $auth ),
 		) );
 
+		register_rest_route( 'work-os/v1', '/memory/(?P<id>\d+)/archive', array(
+			'methods'             => 'POST',
+			'callback'            => array( 'WorkOS_Memory', 'archive_event' ),
+			'permission_callback' => $auth,
+			'args'                => array(
+				'id' => array( 'validate_callback' => fn( $v ) => is_numeric( $v ) ),
+			),
+		) );
+
 		register_rest_route( 'work-os/v1', '/memory/(?P<id>\d+)', array(
 			'methods'             => 'DELETE',
 			'callback'            => array( 'WorkOS_Memory', 'delete_event' ),

@@ -64,12 +64,15 @@ class WorkOS_Blog {
 			}
 		}
 
-		$prompt  = "Write {$format_label} for a personal professional blog.\n\nTopic: {$topic}\n";
+		$blog_rules = WorkOS_Settings::get_blog_prompt_rules();
+
+		$prompt  = "Write {$format_label} for a personal professional blog.\n\n";
+		$prompt .= $blog_rules . "\n\n";
+		$prompt .= "Topic: {$topic}\n";
 		if ( $extra ) $prompt .= "Additional context: {$extra}\n";
 		$prompt .= "\nAuthor profile:\n{$profile_ctx}";
 		$prompt .= $memory_ctx;
 		$prompt .= $projects_ctx;
-		$prompt .= "\n\nRules:\n- First person, confident and direct\n- No generic filler or hype\n- Specific and concrete — real examples, real numbers\n- WordPress / PHP developer perspective\n- Target audience: other developers and potential clients\n- 500-800 words\n- Start with: Title: [your suggested title] on its own line, then the post body\n- Markdown formatting (## headings, **bold**, lists)";
 
 		$response = wp_remote_post(
 			'https://api.anthropic.com/v1/messages',
