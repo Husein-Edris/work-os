@@ -48,6 +48,8 @@ A WordPress plugin for managing your freelance career from wp-admin. Research co
 
 Database tables are created automatically on activation. Version bumps run `dbDelta` on `admin_init` — no manual migrations needed.
 
+**No secrets in code.** All API keys and tokens are stored in the WordPress database via the Settings page. Nothing sensitive is committed to this repository.
+
 ---
 
 ## Database
