@@ -25,7 +25,8 @@ class WorkOS_Proposals {
 			return new WP_Error( 'no_key', 'Claude API key not configured.', array( 'status' => 400 ) );
 		}
 
-		$raw_text = sanitize_textarea_field( $request->get_param( 'raw_text' ) );
+		$raw_text = $request->get_param( 'raw_text' );
+		$raw_text = str_replace( "\0", '', wp_kses( (string) $raw_text, array() ) );
 		if ( ! $raw_text ) {
 			return new WP_Error( 'missing_param', 'raw_text is required.', array( 'status' => 400 ) );
 		}
@@ -51,7 +52,7 @@ class WorkOS_Proposals {
 					'anthropic-version' => '2023-06-01',
 				),
 				'body' => wp_json_encode( array(
-					'model'      => 'claude-sonnet-4-6',
+					'model'      => WorkOS_Settings::get_claude_model(),
 					'max_tokens' => 600,
 					'messages'   => array(
 						array( 'role' => 'user', 'content' => $prompt ),
@@ -252,7 +253,7 @@ class WorkOS_Proposals {
 					'anthropic-version' => '2023-06-01',
 				),
 				'body' => wp_json_encode( array(
-					'model'      => 'claude-sonnet-4-6',
+					'model'      => WorkOS_Settings::get_claude_model(),
 					'max_tokens' => 800,
 					'messages'   => array(
 						array( 'role' => 'user', 'content' => $prompt ),

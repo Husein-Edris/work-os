@@ -52,7 +52,8 @@ class WorkOS_Settings {
 	public static function get_cv_email()    { return get_option( 'work_os_cv_email', get_option( 'admin_email' ) ); }
 	public static function get_cv_address()  { return get_option( 'work_os_cv_address', '' ); }
 	public static function get_cv_linkedin() { return get_option( 'work_os_cv_linkedin', '' ); }
-	public static function get_cv_github()   { return get_option( 'work_os_cv_github', '' ); }
+	public static function get_cv_github()      { return get_option( 'work_os_cv_github', '' ); }
+	public static function get_github_token()   { return get_option( 'work_os_github_token', '' ); }
 	public static function get_linkedin_client_id()     { return get_option( 'work_os_linkedin_client_id', '' ); }
 	public static function get_linkedin_client_secret() { return get_option( 'work_os_linkedin_client_secret', '' ); }
 
@@ -64,6 +65,8 @@ class WorkOS_Settings {
 			"- Never inflate WordPress plugin work into 'platform engineering' or similar.",
 			"- Never claim a percentage improvement, user count, or revenue figure unless it appears explicitly in the profile.",
 			"- If the job lists tech the candidate lacks, name the gap honestly in one sentence and offer to bridge it. Do not hide it.",
+			"- If no project in the profile genuinely matches the job's domain, do not force a parallel. Name the closest adjacent project in one sentence and acknowledge the domain is new. A short honest letter beats a padded one.",
+			"- Referencing a concrete project is permission, not obligation. If nothing fits, skip it and lean on transferable skills instead.",
 			"",
 			"WRITING RULES:",
 			"- No AI filler: no 'I am thrilled', 'hope this finds you well', 'I came across your posting'",
@@ -100,5 +103,9 @@ class WorkOS_Settings {
 
 	public static function get_blog_prompt_rules(): string {
 		return get_option( 'work_os_prompt_blog_rules', '' ) ?: self::default_blog_prompt_rules();
+	}
+
+	public static function get_claude_model(): string {
+		return 'claude-sonnet-4-6';
 	}
 }

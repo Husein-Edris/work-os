@@ -14,6 +14,7 @@ class WorkOS_Router {
 		require_once WORK_OS_PATH . 'includes/api/class-proposals.php';
 		require_once WORK_OS_PATH . 'includes/api/class-blog.php';
 		require_once WORK_OS_PATH . 'includes/api/class-documents.php';
+		require_once WORK_OS_PATH . 'includes/api/class-github-sync.php';
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
@@ -126,6 +127,31 @@ class WorkOS_Router {
 		register_rest_route( 'work-os/v1', '/blog/publish', array(
 			'methods'             => 'POST',
 			'callback'            => array( 'WorkOS_Blog', 'publish' ),
+			'permission_callback' => $auth,
+		) );
+
+		// GitHub Sync
+		register_rest_route( 'work-os/v1', '/github/list', array(
+			'methods'             => 'GET',
+			'callback'            => array( 'WorkOS_GitHub_Sync', 'list_repos' ),
+			'permission_callback' => $auth,
+		) );
+
+		register_rest_route( 'work-os/v1', '/github/generate', array(
+			'methods'             => 'POST',
+			'callback'            => array( 'WorkOS_GitHub_Sync', 'generate_project' ),
+			'permission_callback' => $auth,
+		) );
+
+		register_rest_route( 'work-os/v1', '/github/skip', array(
+			'methods'             => 'POST',
+			'callback'            => array( 'WorkOS_GitHub_Sync', 'skip_repo' ),
+			'permission_callback' => $auth,
+		) );
+
+		register_rest_route( 'work-os/v1', '/github/unskip', array(
+			'methods'             => 'POST',
+			'callback'            => array( 'WorkOS_GitHub_Sync', 'unskip_repo' ),
 			'permission_callback' => $auth,
 		) );
 	}

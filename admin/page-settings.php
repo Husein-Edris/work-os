@@ -26,6 +26,9 @@ if ( isset( $_POST['work_os_settings_nonce'] ) && wp_verify_nonce( $_POST['work_
 	if ( isset( $_POST['cv_github'] ) ) {
 		update_option( 'work_os_cv_github', esc_url_raw( $_POST['cv_github'] ) );
 	}
+	if ( isset( $_POST['github_token'] ) && strpos( $_POST['github_token'], '*' ) === false ) {
+		update_option( 'work_os_github_token', sanitize_text_field( $_POST['github_token'] ) );
+	}
 
 	// Upwork
 	if ( isset( $_POST['upwork_client_id'] ) ) {
@@ -88,6 +91,7 @@ $cv_email             = get_option( 'work_os_cv_email', get_option( 'admin_email
 $cv_address           = get_option( 'work_os_cv_address', '' );
 $cv_linkedin          = get_option( 'work_os_cv_linkedin', '' );
 $cv_github            = get_option( 'work_os_cv_github', '' );
+$github_token         = get_option( 'work_os_github_token', '' );
 $upwork_client_id     = get_option( 'work_os_upwork_client_id', '' );
 $upwork_client_secret = get_option( 'work_os_upwork_client_secret', '' );
 $linkedin_client_id     = get_option( 'work_os_linkedin_client_id', '' );
@@ -155,6 +159,21 @@ if ( ! function_exists( 'work_os_mask' ) ) {
 					<input type="url" id="cv_github" name="cv_github" class="regular-text"
 						value="<?php echo esc_attr( $cv_github ); ?>"
 						placeholder="https://github.com/Husein-Edris">
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="github_token">GitHub Token</label></th>
+				<td>
+					<input type="password" id="github_token" name="github_token" class="regular-text"
+						value="<?php echo esc_attr( work_os_mask( $github_token ) ); ?>"
+						autocomplete="new-password">
+					<p class="description">
+						<?php if ( $github_token ) : ?>
+							<span style="color:#00a32a">&#10003; Token set</span> — enter a new value to replace. Raises GitHub API limit to 5,000 requests/hour.
+						<?php else : ?>
+							Optional. <a href="https://github.com/settings/tokens" target="_blank">Generate a fine-grained token</a> with public repository read access. Raises rate limit from 60 to 5,000 requests/hour.
+						<?php endif; ?>
+					</p>
 				</td>
 			</tr>
 		</table>

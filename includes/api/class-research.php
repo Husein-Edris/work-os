@@ -194,7 +194,7 @@ class WorkOS_Research {
 					'anthropic-version' => '2023-06-01',
 				),
 				'body' => wp_json_encode( array(
-					'model'      => 'claude-sonnet-4-6',
+					'model'      => WorkOS_Settings::get_claude_model(),
 					'max_tokens' => 2000,
 					'messages'   => array(
 						array( 'role' => 'user', 'content' => $prompt ),

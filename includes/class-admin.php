@@ -9,6 +9,13 @@ class WorkOS_Admin {
 	public function init() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'edit_form_top', function( $post ) {
+			if ( $post->post_type !== 'project' ) return;
+			if ( ! get_post_meta( $post->ID, '_work_os_needs_review', true ) ) return;
+			$repo = get_post_meta( $post->ID, '_work_os_generated_from_repo', true );
+			$when = get_post_meta( $post->ID, '_work_os_generated_at', true );
+			echo '<div class="notice notice-warning inline" style="margin:10px 0 20px"><p><strong>Generated from GitHub repo:</strong> ' . esc_html( $repo ) . ' (on ' . esc_html( $when ) . '). Review before publishing — verify all facts against the actual project.</p></div>';
+		} );
 	}
 
 	public function register_menu() {
@@ -30,6 +37,7 @@ class WorkOS_Admin {
 		add_submenu_page( 'work-os', 'Memory — Work OS',    'Memory',    'manage_options', 'work-os-memory',    array( $this, 'page_memory' ) );
 		add_submenu_page( 'work-os', 'Blog — Work OS',      'Blog',      'manage_options', 'work-os-blog',      array( $this, 'page_blog' ) );
 		add_submenu_page( 'work-os', 'Settings — Work OS',  'Settings',  'manage_options', 'work-os-settings',  array( $this, 'page_settings' ) );
+		add_submenu_page( 'work-os', 'GitHub Sync — Work OS', 'GitHub Sync', 'manage_options', 'work-os-github', array( $this, 'page_github' ) );
 	}
 
 	public function enqueue_assets( $hook ) {
@@ -42,6 +50,7 @@ class WorkOS_Admin {
 			'work-os_page_work-os-memory',
 			'work-os_page_work-os-blog',
 			'work-os_page_work-os-settings',
+			'work-os_page_work-os-github',
 		);
 
 		// Enqueue WP media uploader for Documents page
@@ -180,5 +189,9 @@ class WorkOS_Admin {
 
 	public function page_settings() {
 		require_once WORK_OS_PATH . 'admin/page-settings.php';
+	}
+
+	public function page_github() {
+		require_once WORK_OS_PATH . 'admin/page-github.php';
 	}
 }
