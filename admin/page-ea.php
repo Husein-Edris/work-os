@@ -1091,7 +1091,11 @@ $cv_address    = get_option( 'work_os_cv_address', 'Mitteldorfgasse 1a, 6850 Dor
 
     document.getElementById('wo-ea-print-btn').addEventListener('click', () => {
         buildPrintView();
+        const year = (document.getElementById('wo-ea-start').value || '').split('-')[0] || new Date().getFullYear();
+        const prev = document.title;
+        document.title = 'E_A Bericht—Edris-Husein-' + year;
         window.print();
+        document.title = prev;
     });
 
     document.querySelectorAll('.wo-ea-tab').forEach(tab => {
