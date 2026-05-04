@@ -10,6 +10,14 @@ if ( isset( $_POST['work_os_settings_nonce'] ) && wp_verify_nonce( $_POST['work_
 		update_option( 'work_os_gemini_key', sanitize_text_field( $_POST['gemini_key'] ) );
 	}
 
+	// FastBill
+	if ( isset( $_POST['fastbill_email'] ) ) {
+		update_option( 'work_os_fastbill_email', sanitize_email( $_POST['fastbill_email'] ) );
+	}
+	if ( isset( $_POST['fastbill_api_key'] ) && strpos( $_POST['fastbill_api_key'], '*' ) === false ) {
+		update_option( 'work_os_fastbill_api_key', sanitize_text_field( $_POST['fastbill_api_key'] ) );
+	}
+
 	// CV & Contact
 	if ( isset( $_POST['cv_phone'] ) ) {
 		update_option( 'work_os_cv_phone', sanitize_text_field( $_POST['cv_phone'] ) );
@@ -77,6 +85,8 @@ $cv_linkedin          = get_option( 'work_os_cv_linkedin', '' );
 $cv_github            = get_option( 'work_os_cv_github', '' );
 $github_token         = get_option( 'work_os_github_token', '' );
 $voice_rate           = get_option( 'work_os_voice_rate', '€38/hr' );
+$fastbill_email       = get_option( 'work_os_fastbill_email', '' );
+$fastbill_api_key     = get_option( 'work_os_fastbill_api_key', '' );
 $voice_niche          = get_option( 'work_os_voice_niche', 'WordPress / WooCommerce' );
 $voice_tagline        = get_option( 'work_os_voice_tagline', '' );
 $prompt_draft_custom  = get_option( 'work_os_prompt_draft_rules', '' );
@@ -186,6 +196,34 @@ if ( ! function_exists( 'work_os_mask' ) ) {
 							<span style="color:#00a32a">&#10003; Key set</span> — enter a new value to replace.
 						<?php else : ?>
 							Get your key at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>.
+						<?php endif; ?>
+					</p>
+				</td>
+			</tr>
+		</table>
+
+		<h2 class="title">FastBill</h2>
+		<p class="description" style="margin-bottom:12px">Required for the E/A Bericht feature.</p>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row"><label for="fastbill_email">FastBill Email</label></th>
+				<td>
+					<input type="email" id="fastbill_email" name="fastbill_email" class="regular-text"
+						value="<?php echo esc_attr( $fastbill_email ); ?>"
+						placeholder="kontakt@edrishusein.com">
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="fastbill_api_key">FastBill API Key</label></th>
+				<td>
+					<input type="password" id="fastbill_api_key" name="fastbill_api_key" class="regular-text"
+						value="<?php echo esc_attr( work_os_mask( $fastbill_api_key ) ); ?>"
+						autocomplete="new-password">
+					<p class="description">
+						<?php if ( $fastbill_api_key ) : ?>
+							<span style="color:#00a32a">&#10003; Key set</span> — enter a new value to replace.
+						<?php else : ?>
+							Find your key in FastBill under Einstellungen → API.
 						<?php endif; ?>
 					</p>
 				</td>

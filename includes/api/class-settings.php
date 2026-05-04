@@ -54,6 +54,8 @@ class WorkOS_Settings {
 	public static function get_cv_linkedin() { return get_option( 'work_os_cv_linkedin', '' ); }
 	public static function get_cv_github()      { return get_option( 'work_os_cv_github', '' ); }
 	public static function get_github_token()   { return get_option( 'work_os_github_token', '' ); }
+	public static function get_fastbill_email()   { return get_option( 'work_os_fastbill_email', '' ); }
+	public static function get_fastbill_api_key() { return get_option( 'work_os_fastbill_api_key', '' ); }
 	public static function get_linkedin_client_id()     { return get_option( 'work_os_linkedin_client_id', '' ); }
 	public static function get_linkedin_client_secret() { return get_option( 'work_os_linkedin_client_secret', '' ); }
 

@@ -81,6 +81,14 @@ class WorkOS_DB {
 			PRIMARY KEY (id)
 		) $charset;" );
 
+		dbDelta( "CREATE TABLE {$wpdb->prefix}work_os_ea_vendor_mappings (
+			id varchar(20) NOT NULL,
+			pattern varchar(255) NOT NULL,
+			category varchar(100) NOT NULL,
+			priority int(11) NOT NULL DEFAULT 0,
+			PRIMARY KEY (id)
+		) $charset;" );
+
 		dbDelta( "CREATE TABLE {$wpdb->prefix}work_os_suggestions (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,

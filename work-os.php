@@ -3,7 +3,7 @@
  * Plugin Name: Work OS
  * Plugin URI:  https://edrishusein.com
  * Description: Personal career intelligence system — CV, memory, research, blog generation.
- * Version:     0.3.5
+ * Version:     0.4.0
  * Author:      Edris Husein
  * Author URI:  https://edrishusein.com
  * License:     GPL-2.0-or-later
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'WORK_OS_VERSION', '0.3.5' );
+define( 'WORK_OS_VERSION', '0.4.0' );
 define( 'WORK_OS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WORK_OS_URL', plugin_dir_url( __FILE__ ) );
 
@@ -23,9 +23,12 @@ require_once WORK_OS_PATH . 'includes/class-db.php';
 register_activation_hook( __FILE__, array( 'WorkOS_DB', 'create_tables' ) );
 
 add_action( 'admin_init', function () {
+	require_once WORK_OS_PATH . 'includes/api/class-ea-report.php';
 	if ( get_option( 'work_os_db_version' ) !== WORK_OS_VERSION ) {
 		WorkOS_DB::create_tables();
+		update_option( 'work_os_db_version', WORK_OS_VERSION );
 	}
+	WorkOS_EA_Report::seed_mappings();
 } );
 
 add_action( 'plugins_loaded', function () {

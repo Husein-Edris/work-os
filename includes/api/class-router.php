@@ -16,6 +16,7 @@ class WorkOS_Router {
 		require_once WORK_OS_PATH . 'includes/api/class-documents.php';
 		require_once WORK_OS_PATH . 'includes/api/class-portfolio-analyzer.php';
 		require_once WORK_OS_PATH . 'includes/api/class-github-sync.php';
+		require_once WORK_OS_PATH . 'includes/api/class-ea-report.php';
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
@@ -199,6 +200,29 @@ class WorkOS_Router {
 			'methods'             => 'POST',
 			'callback'            => array( 'WorkOS_GitHub_Sync', 'unskip_repo' ),
 			'permission_callback' => $auth,
+		) );
+
+		// E/A Bericht
+		register_rest_route( 'work-os/v1', '/ea/report', array(
+			'methods'             => 'POST',
+			'callback'            => array( 'WorkOS_EA_Report', 'report' ),
+			'permission_callback' => $auth,
+		) );
+
+		register_rest_route( 'work-os/v1', '/ea/categories', array(
+			'methods'             => 'GET',
+			'callback'            => array( 'WorkOS_EA_Report', 'list_categories' ),
+			'permission_callback' => $auth,
+		) );
+
+		register_rest_route( 'work-os/v1', '/ea/vendor-mappings', array(
+			array( 'methods' => 'GET',  'callback' => array( 'WorkOS_EA_Report', 'list_mappings' ),   'permission_callback' => $auth ),
+			array( 'methods' => 'POST', 'callback' => array( 'WorkOS_EA_Report', 'create_mapping' ),  'permission_callback' => $auth ),
+		) );
+
+		register_rest_route( 'work-os/v1', '/ea/vendor-mappings/(?P<id>[a-z0-9\-]+)', array(
+			array( 'methods' => 'PATCH',  'callback' => array( 'WorkOS_EA_Report', 'update_mapping' ), 'permission_callback' => $auth ),
+			array( 'methods' => 'DELETE', 'callback' => array( 'WorkOS_EA_Report', 'delete_mapping' ), 'permission_callback' => $auth ),
 		) );
 	}
 }

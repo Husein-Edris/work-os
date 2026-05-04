@@ -39,6 +39,7 @@ class WorkOS_Admin {
 		add_submenu_page( 'work-os', 'Settings — Work OS',  'Settings',  'manage_options', 'work-os-settings',  array( $this, 'page_settings' ) );
 		add_submenu_page( 'work-os', 'Portfolio — Work OS',   'Portfolio',   'manage_options', 'work-os-portfolio', array( $this, 'page_portfolio' ) );
 		add_submenu_page( 'work-os', 'GitHub Sync — Work OS', 'GitHub Sync', 'manage_options', 'work-os-github',    array( $this, 'page_github' ) );
+		add_submenu_page( 'work-os', 'E/A Bericht — Work OS', 'E/A Bericht', 'manage_options', 'work-os-ea',      array( $this, 'page_ea' ) );
 	}
 
 	public function enqueue_assets( $hook ) {
@@ -53,6 +54,7 @@ class WorkOS_Admin {
 			'work-os_page_work-os-settings',
 			'work-os_page_work-os-portfolio',
 			'work-os_page_work-os-github',
+			'work-os_page_work-os-ea',
 		);
 
 		// Enqueue WP media uploader for Documents page
@@ -199,5 +201,9 @@ class WorkOS_Admin {
 
 	public function page_github() {
 		require_once WORK_OS_PATH . 'admin/page-github.php';
+	}
+
+	public function page_ea() {
+		require_once WORK_OS_PATH . 'admin/page-ea.php';
 	}
 }
