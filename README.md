@@ -22,7 +22,11 @@ A WordPress plugin for managing your freelance career from wp-admin. Research co
 
 **GitHub Sync** — Compares your public GitHub repos against your portfolio projects CPT. Repos with a substantial README that are missing from your portfolio get a "Generate draft" button — Claude reads the actual README and repo metadata, then creates a project CPT draft with all ACF fields populated (challenge, solution, tech stack, key features, GitHub URL). Drafts are flagged for review before publishing. Repos you want to skip permanently can be blocklisted.
 
-**Settings** — API keys (Claude, Gemini) and GitHub token. CV contact details (phone, address, LinkedIn, GitHub). Custom AI prompt rules for proposals and blog generation.
+**Portfolio** — Analyse your `project` CPT entries and get AI suggestions for improving descriptions, headlines, and tech stack coverage.
+
+**E/A Bericht** — Einnahmen-Ausgaben-Rechnung generator for Austrian Kleinunternehmer. Pulls paid invoices and expense receipts from FastBill for any date range, converts foreign-currency amounts to EUR via Frankfurter.app, categorises expenses by vendor pattern matching, and renders a formal PDF report (cover page + category summary) matching the Austrian accountant format. Amounts are editable inline, manual entries can be added (depreciation, rent, etc.), and the report survives page reloads via localStorage.
+
+**Settings** — API keys (Claude, Gemini) and GitHub token. CV contact details (phone, address, LinkedIn, GitHub). FastBill credentials (email + API key). Custom AI prompt rules for proposals and blog generation.
 
 ---
 
@@ -62,6 +66,7 @@ Four custom tables in your WordPress database:
 | `{prefix}work_os_memory` | Memory events with kind, tags, and note text |
 | `{prefix}work_os_research_log` | Raw research and analysis output per company |
 | `{prefix}work_os_documents` | Document titles, categories, and media attachment IDs |
+| `{prefix}work_os_ea_vendor_mappings` | Vendor pattern-to-category rules for E/A Bericht expense categorisation |
 
 WordPress options used:
 
@@ -69,6 +74,8 @@ WordPress options used:
 |---|---|
 | `work_os_github_token` | GitHub personal access token |
 | `work_os_repo_blocklist` | Serialised array of repo names permanently skipped in GitHub Sync |
+| `work_os_fastbill_email` | FastBill account email for E/A Bericht |
+| `work_os_fastbill_api_key` | FastBill API key for E/A Bericht |
 
 ---
 
@@ -84,6 +91,8 @@ All external API calls are triggered manually by clicking a button — nothing r
 | Draft proposal letter | Claude Sonnet |
 | Generate project draft from GitHub repo | Claude Sonnet |
 | Fetch repo list + READMEs | GitHub REST API v3 |
+| Fetch invoices and expenses for E/A Bericht | FastBill REST API |
+| Convert foreign-currency invoice amounts to EUR | Frankfurter.app (cached 7 days via `set_transient`) |
 
 ---
 
@@ -134,6 +143,8 @@ work-os/
 │   ├── page-memory.php
 │   ├── page-blog.php
 │   ├── page-github.php
+│   ├── page-portfolio.php
+│   ├── page-ea.php         # E/A Bericht (FastBill + PDF export)
 │   └── page-settings.php
 ├── includes/
 │   ├── api/                # REST API handlers (one class per resource)
@@ -144,7 +155,9 @@ work-os/
 │   │   ├── class-proposals.php
 │   │   ├── class-blog.php
 │   │   ├── class-documents.php
+│   │   ├── class-portfolio-analyzer.php
 │   │   ├── class-github-sync.php
+│   │   ├── class-ea-report.php  # FastBill fetch, EUR conversion, vendor mapping CRUD
 │   │   └── class-router.php
 │   ├── class-admin.php     # Menu registration, asset enqueueing
 │   └── class-db.php        # Table definitions via dbDelta
